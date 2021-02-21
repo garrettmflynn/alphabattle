@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="en">
+  <head>
+
+  <meta charset=utf-8>
+  <meta http-equiv=X-UA-Compatible content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta property="og:title" content="AlphaBattle" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://brainsatplay.com/alphabattle/header.png" />
+  <meta property="og:description" content="Fight to the death with your brains 🤯" />
+  <meta property="og:url" content="https://brainsatplay.com/alphabattle" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@brainsatplay">
+  <meta name="twitter:creator" content="@brainsatplay">
+  <meta name="twitter:domain" content="brainsatplay.com">
+  <meta name="twitter:title" content="AlphaBattle">
+  <meta name="twitter:url" content="https://brainsatplay.com/alphabattle">
+  <meta name="twitter:description" content="Fight to the death with your brains 🤯">
+  <meta name="twitter:image:src" content="https://brainsatplay.com/alphabattle/header.png">
+  <title>AlphaBattle | Brains@Play</title>
+  <link rel=icon href='./favicon.ico'>
+  <script src="./info-card.js" type="text/javascript" defer></script>
+
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script src="./brainsatplay.js"></script>
+
+</head>
+  <body>
+    <info-card name = "AlphaBattle"
+               author = "Brains@Play | 2021 UW CNT Hackathon Team"
+               website = "https://devpost.com/software/alphabattle"
+               description = "<p>Fight to the death with your brains 🤯</p>"
+               links = '{}'
+    ></info-card>
+    <div id="p5Div" style="
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    background: transparent;
+    "></div>
+
+    <script>
+      game = new brainsatplay.Game('alphabattle')
+      game.simulate(1);
+    </script>
+
+
+    <script src="./p5.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/addons/p5.sound.min.js"></script> -->
+    <script src="./sketch.js"></script>
+
+  </body>
+</html>
