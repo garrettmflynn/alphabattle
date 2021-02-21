@@ -18,11 +18,12 @@
       beginGameToggle = createButton('Begin Game');
       museToggle = createButton('Connect Muse');
       disconnectToggle = createButton('Disconnect');
-      connectToggle.position(windowWidth-25-connectToggle.width, windowHeight-125-connectToggle.height);
-      disconnectToggle.position(windowWidth-25-disconnectToggle.width, windowHeight-125-disconnectToggle.height);
+      connectToggle.position(windowWidth-25-connectToggle.width, windowHeight-50-connectToggle.height);
+      disconnectToggle.position(windowWidth-25-disconnectToggle.width, windowHeight-50-disconnectToggle.height);
       museToggle.position(windowWidth-25-museToggle.width, windowHeight-50-museToggle.height);
       beginGameToggle.position((windowWidth/2)-museToggle.width, (windowHeight/2)-museToggle.height);
       disconnectToggle.hide()
+      connectToggle.hide()
       beginGameToggle.hide()
 
 
@@ -30,6 +31,7 @@
       museToggle.mousePressed(async () => {
           await game.bluetooth.devices['muse'].connect()
           game.connectBluetoothDevice()
+          connectToggle.show()
       });
 
       connectToggle.mousePressed(() => {
@@ -65,25 +67,43 @@
       // Update Voltage Buffers and Derived Variables
       game.update();
 
+      // Get Opponent (if exists)
       let me = game.brains[game.info.access].get(game.me.username)
+      let opponent;
+      if(me !== undefined){
+        opponent = game.brains[game.info.access].get(me.data.opponent)
+      }
+
+      // Try to Assign Opponents (if connected to server)
       if (game.connection.status){
       if (me !== undefined){
         if (me.data.ready){
       if (me.data.opponent === undefined ){
           let opp = assignOpponent(game)
-          me.setData({health: 100, opponent: opp})
-      } else {
-      let opponent = game.brains[game.info.access].get(me.data.opponent)
+          if (opp !== undefined){
+            me.setData({health: 100, opponent: opp})
+          }
+      } 
+
+      // Reset If Opponent Leaves
+      else {
       if (opponent === undefined){
-        me.data.opponent = undefined;
-      } else {
-      let attack = Math.random() // me.getMetric('beta')
-      let defense = Math.random() // me.getMetric('alpha')
+        me.data = {opponent:undefined,health: undefined,ready:false}
+        beginGameToggle.show()
+      }  
+      // TERMINATE GAME
+      // else if (opponent.data.terminate){
+      //   me.data = {username:undefined,health: undefined,ready:false}
+      //   opponent.data = {username:undefined,health: undefined,ready:false}
+      //   beginGameToggle.show()
+      // }
+      // Calculate Battle Outcomes
+      else {
+      let attack = me.getMetric('beta')
+      let defense = me.getMetric('alpha')
       // let val = attack.average
       let val = attack
       me.setData({attack:val})
-
-      console.log()
 
       let diff = defense - opponent.data.attack
       if (!isNaN(diff)){
@@ -95,28 +115,31 @@
   }
 }
 
-    let userInd = 0
-    game.brains[game.info.access].forEach( async (user,username) => {
+    let termFlag = false;
+    // Create Me and Opponent Markers
+    [me,opponent].forEach( async (user,ind) => {
+
+      if (user !== undefined){
+
       // Active Indicator
-      if (user.data.health === undefined || user.data.health >= 0){
+      if (user.data.health === undefined){
+        fill(255,50,0)
+      } else if (user.data.health >= 0 || !user.data.ready){
         fill(0,255,50)
       } else {
         fill(255,50,0)
-        me.data.opponent = undefined;
-        me.data.health = undefined;
-        me.data.ready = false;
-        beginGameToggle.show()
+        termFlag = true;
       }
 
-      ellipse(marg-ellipseRad/2, marg + (2.5*ellipseRad)*userInd-ellipseRad/2, ellipseRad)
+      ellipse(marg-ellipseRad/2, marg + (2.5*ellipseRad)*ind-ellipseRad/2, ellipseRad)
       
       fill(100,100,100)
-      ellipse(marg, marg + (2.5*ellipseRad)*userInd, 2*ellipseRad)
+      ellipse(marg, marg + (2.5*ellipseRad)*ind, 2*ellipseRad)
 
       // User Text
       fill('white')
       textAlign(LEFT);
-      text(username + ' vs ' + user.data.opponent, marg + ellipseRad + 10, marg + (2.5*ellipseRad)*userInd)
+      text(user.username + ' vs ' + user.data.opponent, marg + ellipseRad + 10, marg + (2.5*ellipseRad)*ind)
       textAlign(CENTER);
       let health;
       if (user.data.health === undefined){
@@ -124,24 +147,35 @@
       } else {
         health = user.data.health.toFixed(1)
       }
-      text(health, marg, marg + (2.5*ellipseRad)*userInd)
-      userInd++
+      text(health, marg, marg + (2.5*ellipseRad)*ind)
+    }
     })
 
+    if (termFlag){
+      // TERMINATE GAME
+      // me.data = {}
+      // beginGameToggle.show()
+    }
   }
 
     
     windowResized = () => {
       resizeCanvas(windowWidth, windowHeight);
-      connectToggle.position(windowWidth-25-connectToggle.width, windowHeight-125-connectToggle.height);
-      disconnectToggle.position(windowWidth-25-disconnectToggle.width, windowHeight-125-disconnectToggle.height);
+      connectToggle.position(windowWidth-25-connectToggle.width, windowHeight-50-connectToggle.height);
+      disconnectToggle.position(windowWidth-25-disconnectToggle.width, windowHeight-50-disconnectToggle.height);
       museToggle.position(windowWidth-25-museToggle.width, windowHeight-50-museToggle.height);
       beginGameToggle.position((windowWidth/2)-museToggle.width, (windowHeight/2)-museToggle.height);
     }
 
     keyPressed = () => {
       if (keyCode === RETURN) {
-        game.brains[game.info.access].get(game.me.username).setData({active: false})
+
+        // TERMINATE GAME
+
+        // let me = game.brains[game.info.access].get(game.me.username)
+        // let opponent = game.brains[game.info.access].get(me.data.opponent)
+        // me.setData({terminate: true})
+        // opponent.setData({terminate: true})
       } 
     }
 
