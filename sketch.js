@@ -36,11 +36,11 @@
       greeting.position(windowWidth-input.width-50, windowHeight-50-2.5*disconnectToggle.height-40);
 
       // Brains@Play Setup
-      // museToggle.mousePressed(async () => {
-      //     await game.bluetooth.devices['muse'].connect()
-      //     game.connectBluetoothDevice()
-      //     connectToggle.show()
-      // });
+      museToggle.mousePressed(async () => {
+          await game.bluetooth.devices['muse'].connect()
+          game.connectBluetoothDevice()
+          connectToggle.show()
+      });
 
       connectToggle.mousePressed(() => {
         if (input.value() !== ''){
@@ -67,17 +67,10 @@
         me.data = {};
         me.data.ready = true;
         beginGameToggle.hide()
-        console.log(me.data)
       })
 
-
-      // game.connect({'guestaccess': true})
-      // connectToggle.hide()
-      // disconnectToggle.hide()
-      museToggle.hide()
-      connectToggle.show()
-
-      // beginGameToggle.show()
+      // museToggle.hide()
+      // connectToggle.show()
     }
     
     draw = () => {
@@ -226,7 +219,7 @@
         textAlign(RIGHT);
         textSize(15)
         if (hasUserId){
-        text(me.username, (windowWidth/2) + (margin)*(-1), windowHeight/2)
+          text(me.username, (windowWidth/2) + (margin)*(-1), windowHeight/2)
         } else {
           text('me', (windowWidth/2) + (margin)*(-1), windowHeight/2)
         }
@@ -234,7 +227,11 @@
       if (opponent !== undefined && opponent.data && opponent.data.ready){
         textAlign(LEFT);
         textSize(15)
-        text(opponent.username, (windowWidth/2) + (margin)*(+1), windowHeight/2)
+        if (opponent.username.match(/\w\w\w\w\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w\w\w\w\w\w\w\w\w/)){
+        text('guest', (windowWidth/2) + (margin)*(+1), windowHeight/2)
+        } else {
+          text(opponent.username, (windowWidth/2) + (margin)*(+1), windowHeight/2)
+        }
       }
     }
   }
