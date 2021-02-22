@@ -1,15 +1,17 @@
 
+
+  
   let connectToggle;
   let disconnectToggle;
   let museToggle;
   let beginGameToggle;
   let input;
   let greeting;
+  let message;
   let margin = 100;
   let hasUserId = false;
   let easing = 0.1;
   let barHeight = 50;
-
   setup = () => {
 
       // P5 Setup
@@ -36,11 +38,11 @@
       greeting.position(windowWidth-input.width-50, windowHeight-50-2.5*disconnectToggle.height-40);
 
       // Brains@Play Setup
-      museToggle.mousePressed(async () => {
-          await game.bluetooth.devices['muse'].connect()
-          game.connectBluetoothDevice()
-          connectToggle.show()
-      });
+      // museToggle.mousePressed(async () => {
+      //     await game.bluetooth.devices['muse'].connect()
+      //     game.connectBluetoothDevice()
+      //     connectToggle.show()
+      // });
 
       connectToggle.mousePressed(() => {
         if (input.value() !== ''){
@@ -69,8 +71,8 @@
         beginGameToggle.hide()
       })
 
-      // museToggle.hide()
-      // connectToggle.show()
+      museToggle.hide()
+      connectToggle.show()
     }
     
     draw = () => {
@@ -151,6 +153,7 @@
         if (me.data.health + diff >= 0 && me.data.health + diff <= 100){
           // Only let health go down
           if (diff < 0){
+            console.log(diff)
             me.data.health += diff
           }
         } else if (me.data.health + diff < 0){
@@ -214,7 +217,10 @@
       textStyle(BOLD)
       textAlign(CENTER);
       textSize(50)
-      text('vs', windowWidth/2, windowHeight/2)
+      text('AlphaBattle', windowWidth/2, windowHeight/4)
+      textStyle(NORMAL)
+      textSize(15)
+      text('Fight to the Death with your Brains 🤯', windowWidth/2, windowHeight/4 + 50)
       if (me !== undefined){
         textAlign(RIGHT);
         textSize(15)
@@ -236,15 +242,14 @@
     }
   }
     
-    windowResized = () => {
-      resizeCanvas(windowWidth, windowHeight);
-      connectToggle.position(windowWidth-25-connectToggle.width, windowHeight-50-connectToggle.height);
-      disconnectToggle.position(windowWidth-25-disconnectToggle.width, windowHeight-50-disconnectToggle.height);
-      museToggle.position(windowWidth-25-museToggle.width, windowHeight-50-museToggle.height);
-      beginGameToggle.position((windowWidth/2)-beginGameToggle.width/2, (3*windowHeight/4)-beginGameToggle.height);
-      input.position(windowWidth-input.width-50, windowHeight-50-2.5*disconnectToggle.height);
-      greeting.position(windowWidth-input.width-50, windowHeight-50-2.5*disconnectToggle.height-40);
-    }
+  windowResized = () => {
+    connectToggle.position(windowWidth-25-connectToggle.width, windowHeight-50-connectToggle.height);
+    disconnectToggle.position(windowWidth-25-disconnectToggle.width, windowHeight-50-disconnectToggle.height);
+    museToggle.position(windowWidth-25-museToggle.width, windowHeight-50-museToggle.height);
+    beginGameToggle.position((windowWidth/2)-beginGameToggle.width/2, (3*windowHeight/4)-beginGameToggle.height);
+    input.position(windowWidth-input.width-50, windowHeight-50-2.5*disconnectToggle.height);
+    greeting.position(windowWidth-input.width-50, windowHeight-50-2.5*disconnectToggle.height-40);
+  }
 
     mouseClicked = () => {
     }
