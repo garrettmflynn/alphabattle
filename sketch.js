@@ -11,6 +11,7 @@
   var colors;
   let state = 0;
   let setReady = false;
+  let opponent;
 
   let margin = 100;
   let hasUserId = false;
@@ -326,11 +327,10 @@
         }
         }
       }
-            }
+    }
             
       
-          let centerY = windowHeight/2;
-      
+          let centerY = windowHeight/2;      
           // Create Me and Opponent Markers
           [me,opponent].forEach( async (user,ind) => {
             let centerX = (windowWidth/2) + (margin)*((2*ind-1))
