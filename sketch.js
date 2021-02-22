@@ -8,6 +8,7 @@
   let margin = 100;
   let hasUserId = false;
   let easing = 0.1;
+  let barHeight = 50;
 
   setup = () => {
 
@@ -207,12 +208,12 @@
         currentColor.setAlpha(155)
         noStroke()
         fill(currentColor)
-        rect(centerX,centerY,(2*ind-1)*user.easedHealth*barScale,10)
+        rect(centerX,centerY - barHeight,(2*ind-1)*user.easedHealth*barScale,barHeight)
       }
     }
     noFill()
     stroke('white')
-    rect(centerX,centerY,(2*ind-1)*100*barScale,10)
+    rect(centerX,centerY - barHeight,(2*ind-1)*100*barScale,barHeight)
     })
 
     if (me !== undefined || opponent !== undefined){
