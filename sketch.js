@@ -47,11 +47,11 @@
       greeting.position(windowWidth-input.width-50, windowHeight-50-2.5*disconnectToggle.height-40);
 
       // Brains@Play Setup
-      // museToggle.mousePressed(async () => {
-      //     await game.bluetooth.devices['muse'].connect()
-      //     game.connectBluetoothDevice()
-      //     connectToggle.show()
-      // });
+      museToggle.mousePressed(async () => {
+          await game.bluetooth.devices['muse'].connect()
+          game.connectBluetoothDevice()
+          connectToggle.show()
+      });
 
       //Audio Setup
       audioToggle.mousePressed(() =>{
@@ -94,8 +94,8 @@
         beginGameToggle.hide()
       })
 
-      museToggle.hide()
-      connectToggle.show()
+      // museToggle.hide()
+      // connectToggle.show()
     }
     
     draw = () => {
@@ -266,6 +266,7 @@
   }
     
   windowResized = () => {
+    resizeCanvas(windowWidth,windowHeight)
     connectToggle.position(windowWidth-25-connectToggle.width, windowHeight-50-connectToggle.height);
     disconnectToggle.position(windowWidth-25-disconnectToggle.width, windowHeight-50-disconnectToggle.height);
     museToggle.position(windowWidth-25-museToggle.width, windowHeight-50-museToggle.height);
