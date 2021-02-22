@@ -64,7 +64,7 @@
       message.style('height','100vh')
       message.style('background','black')
       message.style('z-index','50')
-      message.style('opacity','1')
+      message.style('opacity','0.8')
       message.style('transition','0.5s ease-in-out')
       message.style('pointer-events','none')
       message.center();
@@ -78,7 +78,7 @@
           connectToggle.show()
           input.show()
           greeting.show()
-          state = 1
+          switchState(1)
 
           //Audio
           snd.startDrone(volMain);
@@ -93,7 +93,7 @@
           dict = {'guestaccess': true}
         }          
         game.connect(dict).then(res => {
-          state = 2
+          switchState(2)
           disconnectToggle.show()
           connectToggle.hide()
           input.hide()
@@ -107,9 +107,6 @@
       disconnectToggle.mousePressed(() => {
         disconnect()
     })
-
-      // museToggle.hide()
-      // connectToggle.show()
 
       // Manage Bands
       bandNames.forEach((bandname) => {
@@ -129,6 +126,10 @@
         color('green'), // Naples Yellow
         color('cyan') // Crimson UA
       ]
+
+      // UNCOMMENT TO SKIP MUSE CONNECTION
+      // museToggle.hide()
+      // connectToggle.show()
     }
     
     draw = () => {
@@ -156,7 +157,7 @@
         disconnect()
         toDisconnect = false;
         message.center()
-        message.style('opacity','1')
+        message.style('opacity','0.8')
         startTime = Date.now()
       } else if (startTime != undefined){
          if (Date.now() - startTime > displayTime*1000){
@@ -187,7 +188,7 @@
     keyPressed = () => {
       let keys = [49,50,51]
       if (keys.includes(keyCode)){
-        state = keys.indexOf(keyCode)
+        switchState(keys.indexOf(keyCode))
       }
     }
 
@@ -231,7 +232,7 @@
       // museToggle.show()
       beginGameToggle.hide()
       game.brains[game.info.access].get(game.me.username).data = {};
-      state = 1
+      switchState(1)
     }
 
     function playGame(){
@@ -472,12 +473,12 @@
         Object.keys(bandpowers).forEach((bandName, bandInd) => {
     
           fill(255)
-          text(bandName,100+toCenter,50 + 50*bandInd)
+          text(bandName,110+toCenter,50 + 50*bandInd)
           me.getMetric(bandName).then((bandDict) => {
     
             fill(colors[bandInd])
             noStroke()
-            text(bandDict.average.toFixed(3),100+50+toCenter,50 + 50*bandInd)
+            text(bandDict.average.toFixed(3),110+50+toCenter,50 + 50*bandInd)
             noFill()
             bandDict.channels.forEach((val, channel) => {
               bandpowers[bandName][channel].shift()
@@ -520,4 +521,8 @@
           });
         })
       }
+    }
+
+    function switchState(newState){
+      state = newState
     }
