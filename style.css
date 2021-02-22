@@ -28,7 +28,14 @@ html, body {
       h5{
           margin:0px
       }
-  
+
+      input {
+        padding: 10px 0px; display: flex; align-items: center; justify-content:center; color: white; background:transparent; border: transparent; border-bottom: 1px solid white;
+      }
+      input:focus{
+        outline: none;
+    }
+    
       button {
           width: 200px;
           min-height: 50px;
