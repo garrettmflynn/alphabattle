@@ -134,21 +134,27 @@
       let centerY = windowHeight/2 - (marg/2)
       let centerX = (windowWidth/2) + (marg)*((2*ind-1))
 
-      ellipse(centerX-(2*ind-1)*ellipseRad/2, centerY-ellipseRad/2, ellipseRad)
-      
-      fill(100,100,100)
-      ellipse(centerX, centerY, 2*ellipseRad)
+      // ellipse(centerX-(2*ind-1)*ellipseRad/2, centerY-ellipseRad/2, ellipseRad)
+      // fill(100,100,100)
+      // ellipse(centerX, centerY, 2*ellipseRad)
+
+      let barScale = ((windowWidth/2) - 2*marg)/100
 
       // User Text
       fill('white')
+      textSize(15)
       textAlign(CENTER);
       let health;
       if (user.data.health === undefined){
-        health = 'None'
+        health = ''
+        fill(100)
+        rect(centerX-(2*ind-1)*ellipseRad/2,centerY-ellipseRad/2,(2*ind-1)*100*barScale,10)
       } else {
+        fill(255,50,0)
         health = user.data.health.toFixed(1)
+        rect(centerX-(2*ind-1)*ellipseRad/2,centerY-ellipseRad/2,(2*ind-1)*health*barScale,10)
       }
-      text(health, centerX, centerY)
+      // text(health, centerX, centerY)
     }
     })
 
@@ -156,13 +162,16 @@
       fill('white')
       textStyle(BOLD)
       textAlign(CENTER);
+      textSize(50)
       text('vs', windowWidth/2, windowHeight/2)
       if (me !== undefined){
         textAlign(RIGHT);
-        text(me.username, (windowWidth/2) + (marg)*(-1), windowHeight/2)
+        textSize(15)
+        text('me', (windowWidth/2) + (marg)*(-1), windowHeight/2)
       }
       if (opponent !== undefined && opponent.data.ready){
         textAlign(LEFT);
+        textSize(15)
         text(opponent.username, (windowWidth/2) + (marg)*(+1), windowHeight/2)
       }
 
