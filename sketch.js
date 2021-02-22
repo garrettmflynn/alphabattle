@@ -58,8 +58,6 @@
       museToggle.mousePressed(async () => {
 
           //Audio
-          audioToggle.hide();
-          audioOffToggle.show();
           snd.startDrone();
           snd.setVolume(volMain);
 
