@@ -32,7 +32,7 @@
       // P5 Setup
       createCanvas(windowWidth, windowHeight);
       textAlign(CENTER, CENTER);
-      connectToggle = createButton('Connect to Server');
+      connectToggle = createButton('Join a Game');
       beginGameToggle = createButton('Begin Game');
       museToggle = createButton('Connect Muse');
       disconnectToggle = createButton('Disconnect');
@@ -96,15 +96,10 @@
           input.hide()
           greeting.hide()
           museToggle.hide()
-          beginGameToggle.show()
-      });
-    
-      disconnectToggle.mousePressed(() => {
-          disconnect()
-          state = 1
-      })
+          // beginGameToggle.show()
+      // });
 
-      beginGameToggle.mousePressed(() => {
+      // beginGameToggle.mousePressed(() => {
         me = game.brains[game.info.access].get(game.me.username)
         if (me.data.opponent !== undefined){
           game.brains[game.info.access].get(me.data.opponent).data = {}
@@ -113,6 +108,11 @@
         me.data.ready = true;
         beginGameToggle.hide()
       })
+
+      disconnectToggle.mousePressed(() => {
+        disconnect()
+        state = 1
+    })
 
       // museToggle.hide()
       // connectToggle.show()
@@ -410,6 +410,10 @@
 
 
     function voltageInspector() {
+
+      // textAlign(CENTER)
+      // textSize(25)
+      // text('Inspect Voltage Data',windowWidth/2, windowHeight/2)
       noStroke()
       fill(50,50,50)
       let headWidth = Math.min(windowHeight/2, windowWidth/2)
@@ -444,8 +448,8 @@
     
       // Colored Line
     stroke(
-      255*(contactQuality[channelDict.index]/100), // Red
-      255*(1-contactQuality[channelDict.index]/100), // Green
+      255*(1-contactQuality[channelDict.index]), // Red
+      255*(contactQuality[channelDict.index]), // Green
         0
       )
     
