@@ -49,8 +49,15 @@
 
       message = createElement('div')
       message.style('text-align','center')
+      message.style('display','flex')
+      message.style('justify-content','center')
+      message.style('align-items','center')
+      message.style('width','100vw')
+      message.style('height','100vh')
+      message.style('background','black')
+      message.style('transition','0.5s ease-in-out')
+      message.style('opacity','0')
       message.center();
-      message.hide()
 
       // museToggle.mousePressed(async () =>  {
       //     //Audio
@@ -115,11 +122,14 @@
       if (toDisconnect){
         disconnect()
         toDisconnect = false;
+        message.center()
+        message.style('opacity','1')
+        startTime = Date.now()
       } else if (startTime != undefined){
          if (Date.now() - startTime > displayTime*1000){
             startTime = undefined;
-            message.hide();
-         }
+            message.style('opacity','0')
+          }
       } else{
       if (game.connection.status){
       if (me !== undefined){
@@ -141,11 +151,8 @@
       if (opponent === undefined){
         console.log('opponent left server')
         toDisconnect = true;
-        message.html(`<h3>Opponent Left Server</h1>
-      <p>Get back in there!</p>`)
-      message.center()
-      message.show()
-      startTime = Date.now()
+        message.html(`<div><h3>Opponent Left Server</h1>
+      <p>Get back in there!</p></div>`)
         // me.data = initializeData()
         // beginGameToggle.show()
       }  
@@ -153,11 +160,8 @@
       else if (opponent.data.health === 0){
         console.log('opponent flatlined')
         toDisconnect = true;
-        message.html(`<h3>You Won</h1>
-      <p>Great job!</p>`)
-      message.center()
-      message.show()
-      startTime = Date.now()
+        message.html(`<div><h3>You Won</h1>
+      <p>Great job!</p></div>`)
         // opponent.data = initializeData()
         // me.data = initializeData()
         // beginGameToggle.show()
@@ -166,11 +170,8 @@
       else if (me.data.health === 0){
         console.log('you flatlined. resetting...')
         toDisconnect = true;
-        message.html(`<h3>You Flatlined...</h1>
-      <p>Better luck next time!</p>`)
-      message.center()
-      message.show()
-      startTime = Date.now()
+        message.html(`<div><h3>You Flatlined...</h1>
+      <p>Better luck next time!</p></div>`)
         // opponent.data = initializeData()
         // me.data = initializeData()
         // beginGameToggle.show()
