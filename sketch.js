@@ -12,6 +12,7 @@
   let state = 0;
   let setReady = false;
   let opponent;
+  let lastOppHealth;
 
   let margin = 100;
   let hasUserId = false;
@@ -315,6 +316,8 @@
               } else {
                 me.data.health = 100;  
               }
+
+              lastOppHealth = opponent.data.health
       
               //giving an alert sound if health drops at a threshold rate or higher:
               if(diff < -5){
