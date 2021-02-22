@@ -153,18 +153,20 @@
       fill('white')
       textSize(15)
       textAlign(CENTER);
-        let c;
+        let currentColor;
       let health;
       if (user.data.health === undefined){
         health = ''
-        c = color(100)
-        fill(c)
+        currentColor = color(100)
+        currentColor.setAlpha(155)
+        fill(currentColor)
         rect(centerX-(2*ind-1)*ellipseRad/2,centerY-ellipseRad/2,(2*ind-1)*100*barScale,10)
       } else {
         health = user.data.health
-        let colorScale = 155*(health/100)
-        c = color(100 - colorScale,100,100)
-        fill(c)
+        let colorScaling = ((100-health)/100)
+        currentColor = color(100 + 155*(colorScaling),100+ 155*(1-colorScaling),100+ 155*(1-colorScaling))
+        currentColor.setAlpha(155)
+        fill(currentColor)
         rect(centerX-(2*ind-1)*ellipseRad/2,centerY-ellipseRad/2,(2*ind-1)*health*barScale,10)
       }
     }
