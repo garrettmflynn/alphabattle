@@ -224,12 +224,12 @@
     function disconnect(){
       game.disconnect()
       disconnectToggle.hide()
-      if (game.bluetooth.status){
-      connectToggle.show()
-      input.show()
-      greeting.show()
-      beginGameToggle.hide()
-      game.brains[game.info.access].get(game.me.username).data = {};
+      if (game.bluetooth.connected){
+        connectToggle.show()
+        input.show()
+        greeting.show()
+        beginGameToggle.hide()
+        game.brains[game.info.access].get(game.me.username).data = {};
         switchState(1)
       } else {
         switchState(0)
