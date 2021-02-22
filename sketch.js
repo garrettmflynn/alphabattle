@@ -62,15 +62,15 @@
       message.html('<div><h1>AlphaBattle</h1><p>Brains@Play | 2021 UW CNT Hackathon Team</p></div>')
       startTime = Date.now() + 1000
 
-      museToggle.mousePressed(async () =>  {
-          //Audio
-          // snd.startDrone();
-          // snd.setVolume(volMain);
-          // BLE
-          await game.bluetooth.devices['muse'].connect()
-          game.connectBluetoothDevice()
-          connectToggle.show()
-      });
+      // museToggle.mousePressed(async () =>  {
+      //     //Audio
+      //     // snd.startDrone();
+      //     // snd.setVolume(volMain);
+      //     // BLE
+      //     await game.bluetooth.devices['muse'].connect()
+      //     game.connectBluetoothDevice()
+      //     connectToggle.show()
+      // });
 
       connectToggle.mousePressed(() => {
         if (input.value() !== ''){
@@ -99,8 +99,8 @@
         beginGameToggle.hide()
       })
 
-      // museToggle.hide()
-      // connectToggle.show()
+      museToggle.hide()
+      connectToggle.show()
     }
     
     draw = () => {
