@@ -45,10 +45,10 @@ class music {
   }
   
    setVolume(volCurr) {
-     this.drone[0].amp(volCurr * 0.125, 0.2);
-     this.drone[1].amp(volCurr * 0.08, 0.2);
-     this.drone[2].amp(volCurr * 0.06, 0.2);
-     this.drone[3].amp(volCurr * 0.075, 0.2);
+     this.drone[0].amp(volCurr * 0.125, 2);
+     this.drone[1].amp(volCurr * 0.08, 2);
+     this.drone[2].amp(volCurr * 0.06, 2);
+     this.drone[3].amp(volCurr * 0.075, 2);
    }
   
   stop(volMain) {
