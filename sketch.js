@@ -89,24 +89,8 @@
           snd.startDrone(volMain);
       });
 
-      connectToggle.mousePressed(async () => {
-        let dict;
-        if (input.value() !== ''){
-          dict = {'guestaccess': true, 'guestId': input.value()}
-          hasUserId = true;
-        } else { 
-          dict = {'guestaccess': true}
-        }          
-        game.connect(dict).then(res => {
-          switchState(2)
-          disconnectToggle.show()
-          connectToggle.hide()
-          input.hide()
-          greeting.hide()
-          museToggle.hide()
-          beginGameToggle.hide()
-          setReady = true;
-      })
+      connectToggle.mousePressed(() => {
+        connect()
       })
 
       disconnectToggle.mousePressed(() => {
@@ -200,6 +184,10 @@
       if (keys.includes(keyCode)){
         switchState(keys.indexOf(keyCode))
       }
+
+      if (keyCode == ENTER){
+        connect()
+      }
     }
 
     function getOpponent(game,me) {
@@ -236,14 +224,39 @@
     function disconnect(){
       game.disconnect()
       disconnectToggle.hide()
+      if (game.bluetooth.status){
       connectToggle.show()
       input.show()
       greeting.show()
-      // museToggle.show()
       beginGameToggle.hide()
       game.brains[game.info.access].get(game.me.username).data = {};
-      switchState(1)
+        switchState(1)
+      } else {
+        switchState(0)
+        museToggle.show()
+      }
     }
+
+    async function connect(){
+        let dict;
+        if (input.value() !== ''){
+          dict = {'guestaccess': true, 'guestId': input.value()}
+          hasUserId = true;
+        } else { 
+          dict = {'guestaccess': true}
+        }          
+        game.connect(dict).then(res => {
+          switchState(2)
+          disconnectToggle.show()
+          connectToggle.hide()
+          input.hide()
+          greeting.hide()
+          museToggle.hide()
+          beginGameToggle.hide()
+          setReady = true;
+      })
+    }
+
 
     function playGame(){
             // Get Opponent (if exists)
