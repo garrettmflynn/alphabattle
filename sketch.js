@@ -27,9 +27,12 @@
   let root = 52.125;
   let nVel = 0.8;
   let volMain = 0.8;
-  let dTime = 20;
   let snd = new music(root, volMain);
   let effects = new sfx(root,nVel);
+  let dTime = 200;
+  let lastAlertTime = 0;
+  let firstAlert = 0;
+  let healthDrop = -3;
 
   setup = () => {
 
@@ -312,6 +315,7 @@
             me.data.attack = val
             let diff = defense - opponent.data.attack
             if (!isNaN(diff)){
+              
               if (me.data.health + diff >= 0 && me.data.health + diff <= 100){
                 // Only let health go down
                 if (diff < 0){
@@ -325,12 +329,19 @@
 
               lastOppHealth = opponent.data.health
       
-              //giving an alert sound if health drops at a threshold rate or higher:
-              if(diff < -5){
-                console.log('health dropped')
-                effects.playAlert(nVel);
-              }
-              snd.updateDetune(me.data.health, 100);
+            //giving an alert sound if health drops at a threshold rate or higher:
+            if(diff < healthDrop){
+              console.log('alert')
+              if(!firstAlert){
+              lastAlertTime = Date.now();
+              firstAlert = 1;  
+              }  
+              if(abs(Date.now() - lastAlertTime - dTime) < 10){
+              effects.playAlert(nVel);
+              lastAlertTime = Date.now();
+              }  
+            }  
+            snd.updateDetune(me.data.health, 100);
             }
           }
           }        
