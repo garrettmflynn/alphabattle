@@ -1,2 +1,2 @@
 # AlphaBattle
-Fight to the death with your brains 🤯
+Use alpha power (relaxation) to defend against the beta bursts of your opponent!
