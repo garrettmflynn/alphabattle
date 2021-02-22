@@ -2,11 +2,7 @@
   let connectToggle;
   let disconnectToggle;
   let museToggle;
-  let marg = 100;
-  let key;
-  let health = 100;
-  let width = 200;
-  let ellipseRad = width/8
+  let margin = 100;
 
   setup = () => {
 
@@ -58,7 +54,7 @@
     
     draw = () => {
 
-      clear()
+      background(0)
 
       if (game.bluetooth.connected && ['flex','block'].includes(museToggle.style('display'))){
           museToggle.hide()
@@ -71,34 +67,53 @@
       let me = game.brains[game.info.access].get(game.me.username)
       let opponent;
       if(me !== undefined){
+        if (me.data.terminate === true){
+          me.data = {}
+        }
         opponent = game.brains[game.info.access].get(me.data.opponent)
       }
+
 
       // Try to Assign Opponents (if connected to server)
       if (game.connection.status){
       if (me !== undefined){
         if (me.data.ready){
+
+      // Assign Opponent If Ready For One
       if (me.data.opponent === undefined ){
           let opp = assignOpponent(game)
           if (opp !== undefined){
+            console.log('setting up my health')
             me.setData({health: 100, opponent: opp})
           }
       } 
 
       // Reset If Opponent Leaves
       else {
+        console.log(me.data)
+
       if (opponent === undefined){
-        terminateGame()
+        console.log('opponent left')
+        me.data = {}
         beginGameToggle.show()
       }  
-      // TERMINATE GAME
-      else if (opponent.data.terminate){
-        terminateGame()
+      // Reset if Opponent Dies
+      else if (opponent.data.health === 0){
+        console.log('opponent flatlined')
+        me.data = {}
+        beginGameToggle.show()
+      } else if (me.data.health === 0){
+        // Reset if You Died
+        me.data.health = undefined;
+        me.data.ready = false;
+        me.data.opponent = undefined;
+        me.data.attack = undefined;
+        console.log('you flatlined. resetting...')
         beginGameToggle.show()
       }
-      // Calculate Battle Outcomes
+      // Keep On Battling!
       else {
-        console.log('battle')
+        console.log('battling')
       // let attack = me.getMetric('beta')
       // let defense = me.getMetric('alpha')
       // let val = attack.average
@@ -116,13 +131,12 @@
           }
         } else if (me.data.health + diff < 0){
           me.data.health = 0;
-          terminateGame()
-          beginGameToggle.show()
         } else {
           me.data.health = 100;
         }
       }
     }
+    console.log(me.data)
     }
   }
   }
@@ -145,9 +159,9 @@
       //   termFlag = true;
       // }
 
-      let centerY = windowHeight/2 - (marg/2)
-      let centerX = (windowWidth/2) + (marg)*((2*ind-1))
-      let barScale = ((windowWidth/2) - 2*marg)/100
+      let centerY = windowHeight/2 - (margin/2)
+      let centerX = (windowWidth/2) + (margin)*((2*ind-1))
+      let barScale = ((windowWidth/2) - 2*margin)/100
 
       // User Text
       fill('white')
@@ -160,14 +174,14 @@
         currentColor = color(100)
         currentColor.setAlpha(155)
         fill(currentColor)
-        rect(centerX-(2*ind-1)*ellipseRad/2,centerY-ellipseRad/2,(2*ind-1)*100*barScale,10)
+        rect(centerX,centerY,(2*ind-1)*100*barScale,10)
       } else {
         health = user.data.health
         let colorScaling = ((100-health)/100)
         currentColor = color(100 + 155*(colorScaling),100+ 155*(1-colorScaling),100+ 155*(1-colorScaling))
         currentColor.setAlpha(155)
         fill(currentColor)
-        rect(centerX-(2*ind-1)*ellipseRad/2,centerY-ellipseRad/2,(2*ind-1)*health*barScale,10)
+        rect(centerX,centerY,(2*ind-1)*health*barScale,10)
       }
     }
     })
@@ -179,25 +193,17 @@
       textSize(50)
       text('vs', windowWidth/2, windowHeight/2)
       if (me !== undefined){
-        console.log('me',me.data)
         textAlign(RIGHT);
         textSize(15)
-        text('me', (windowWidth/2) + (marg)*(-1), windowHeight/2)
+        text('me', (windowWidth/2) + (margin)*(-1), windowHeight/2)
       }
       if (opponent !== undefined && opponent.data.ready){
-        console.log('opponent',opponent.data)
         textAlign(LEFT);
         textSize(15)
-        text(opponent.username, (windowWidth/2) + (marg)*(+1), windowHeight/2)
+        text(opponent.username, (windowWidth/2) + (margin)*(+1), windowHeight/2)
       }
     }
-
-    if (termFlag){
-      terminateGame()
-      beginGameToggle.show()
-    }
   }
-
     
     windowResized = () => {
       resizeCanvas(windowWidth, windowHeight);
@@ -209,23 +215,9 @@
 
     keyPressed = () => {
       if (keyCode === RETURN) {
-        terminateGame()
-        beginGameToggle.show()
+        let me = game.brains[game.info.access].get(game.me.username)
+        me.setData({health: -1000})
       } 
-    }
-
-    function terminateGame(){
-      console.log('terminating game')
-
-      // me.data = {username:undefined,health: undefined,ready:false}
-      // opponent.data = {username:undefined,health: undefined,ready:false}
-
-      // OR 
-
-      let me = game.brains[game.info.access].get(game.me.username)
-      // let opponent = game.brains[game.info.access].get(me.data.opponent)
-      me.setData({terminate: true,ready: false,health:undefined})
-      // opponent.setData({terminate: true})
     }
 
     function beginGame(){
@@ -246,6 +238,7 @@
             let data = game.brains[game.info.access].get(username).data
             if (data.opponent === condition && data.ready){
               opp = username
+              console.log('new opponent: ',opp)
               break loop1
             }
         }
