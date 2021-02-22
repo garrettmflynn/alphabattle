@@ -2,11 +2,7 @@
   let connectToggle;
   let disconnectToggle;
   let museToggle;
-  let marg = 100;
-  let key;
-  let health = 100;
-  let width = 200;
-  let ellipseRad = width/8
+  let margin = 100;
 
   setup = () => {
 
@@ -52,13 +48,13 @@
 
       beginGameToggle.mousePressed(() => {
         beginGameToggle.hide()
-        game.brains[game.info.access].get(game.me.username).data.ready = true;
+        beginGame()
       })
     }
     
     draw = () => {
 
-      clear()
+      background(0)
 
       if (game.bluetooth.connected && ['flex','block'].includes(museToggle.style('display'))){
           museToggle.hide()
@@ -71,90 +67,122 @@
       let me = game.brains[game.info.access].get(game.me.username)
       let opponent;
       if(me !== undefined){
+        if (me.data.terminate === true){
+          me.data = {}
+        }
         opponent = game.brains[game.info.access].get(me.data.opponent)
       }
+
 
       // Try to Assign Opponents (if connected to server)
       if (game.connection.status){
       if (me !== undefined){
         if (me.data.ready){
+
+      // Assign Opponent If Ready For One
       if (me.data.opponent === undefined ){
           let opp = assignOpponent(game)
           if (opp !== undefined){
+            console.log('setting up my health')
             me.setData({health: 100, opponent: opp})
           }
       } 
 
       // Reset If Opponent Leaves
       else {
+        console.log(me.data)
+
       if (opponent === undefined){
-        me.data = {opponent:undefined,health: undefined,ready:false}
+        console.log('opponent left')
+        me.data = {}
         beginGameToggle.show()
       }  
-      // TERMINATE GAME
-      // else if (opponent.data.terminate){
-      //   me.data = {username:undefined,health: undefined,ready:false}
-      //   opponent.data = {username:undefined,health: undefined,ready:false}
-      //   beginGameToggle.show()
-      // }
-      // Calculate Battle Outcomes
+      // Reset if Opponent Dies
+      else if (opponent.data.health === 0){
+        console.log('opponent flatlined')
+        me.data = {}
+        beginGameToggle.show()
+      } else if (me.data.health === 0){
+        // Reset if You Died
+        me.data.health = undefined;
+        me.data.ready = false;
+        me.data.opponent = undefined;
+        me.data.attack = undefined;
+        console.log('you flatlined. resetting...')
+        beginGameToggle.show()
+      }
+      // Keep On Battling!
       else {
-      let attack = me.getMetric('beta')
-      let defense = me.getMetric('alpha')
+        console.log('battling')
+      // let attack = me.getMetric('beta')
+      // let defense = me.getMetric('alpha')
       // let val = attack.average
+      let attack = Math.random()*5
+      let defense =  Math.random()*5
       let val = attack
       me.setData({attack:val})
 
       let diff = defense - opponent.data.attack
       if (!isNaN(diff)){
-        me.data.health += diff
+        if (me.data.health + diff >= 0 && me.data.health + diff <= 100){
+          // Only let health go down
+          if (diff < 0){
+            me.data.health += diff
+          }
+        } else if (me.data.health + diff < 0){
+          me.data.health = 0;
+        } else {
+          me.data.health = 100;
+        }
       }
     }
+    console.log(me.data)
     }
   }
   }
 }
 
     let termFlag = false;
+
     // Create Me and Opponent Markers
     [me,opponent].forEach( async (user,ind) => {
 
       if (user !== undefined){
 
       // Active Indicator
-      if (user.data.health === undefined){
-        fill(255,50,0)
-      } else if (user.data.health >= 0 || !user.data.ready){
-        fill(0,255,50)
-      } else {
-        fill(255,50,0)
-        termFlag = true;
-      }
+      // if (user.data.health === undefined){
+      //   fill(255,50,0)
+      // } else if (user.data.health >= 0 || !user.data.ready){
+      //   fill(0,255,50)
+      // } else {
+      //   fill(255,50,0)
+      //   termFlag = true;
+      // }
 
-      let centerY = windowHeight/2 - (marg/2)
-      let centerX = (windowWidth/2) + (marg)*((2*ind-1))
-
-      // ellipse(centerX-(2*ind-1)*ellipseRad/2, centerY-ellipseRad/2, ellipseRad)
-      // fill(100,100,100)
-      // ellipse(centerX, centerY, 2*ellipseRad)
-
-      let barScale = ((windowWidth/2) - 2*marg)/100
+      let centerY = windowHeight/2 - (margin/2)
+      let centerX = (windowWidth/2) + (margin)*((2*ind-1))
+      let barScale = ((windowWidth/2) - 2*margin)/100
 
       // User Text
       fill('white')
       textSize(15)
       textAlign(CENTER);
+        let currentColor;
       let health;
       if (user.data.health === undefined){
         health = ''
-        fill(100)
-        rect(centerX-(2*ind-1)*ellipseRad/2,centerY-ellipseRad/2,(2*ind-1)*100*barScale,10)
+        currentColor = color(100)
+        currentColor.setAlpha(155)
+        fill(currentColor)
+        rect(centerX,centerY,(2*ind-1)*100*barScale,10)
       } else {
-        fill(255,50,0)
-        health = user.data.health.toFixed(1)
-        rect(centerX-(2*ind-1)*ellipseRad/2,centerY-ellipseRad/2,(2*ind-1)*health*barScale,10)
+        health = user.data.health
+        let colorScaling = ((100-health)/100)
+        currentColor = color(100 + 155*(colorScaling),100+ 155*(1-colorScaling),100+ 155*(1-colorScaling))
+        currentColor.setAlpha(155)
+        fill(currentColor)
+        rect(centerX,centerY,(2*ind-1)*health*barScale,10)
       }
-      // text(health, centerX, centerY)
     }
     })
 
@@ -167,25 +195,15 @@
       if (me !== undefined){
         textAlign(RIGHT);
         textSize(15)
-        text('me', (windowWidth/2) + (marg)*(-1), windowHeight/2)
+        text('me', (windowWidth/2) + (margin)*(-1), windowHeight/2)
       }
       if (opponent !== undefined && opponent.data.ready){
         textAlign(LEFT);
         textSize(15)
-        text(opponent.username, (windowWidth/2) + (marg)*(+1), windowHeight/2)
+        text(opponent.username, (windowWidth/2) + (margin)*(+1), windowHeight/2)
       }
-
-      // fill('white')
-      // text(me.username + ' vs ' + opponent.username, windowWidth/2, windowHeight/2)
-    }
-
-    if (termFlag){
-      // TERMINATE GAME
-      // me.data = {}
-      // beginGameToggle.show()
     }
   }
-
     
     windowResized = () => {
       resizeCanvas(windowWidth, windowHeight);
@@ -197,14 +215,14 @@
 
     keyPressed = () => {
       if (keyCode === RETURN) {
-
-        // TERMINATE GAME
-
-        // let me = game.brains[game.info.access].get(game.me.username)
-        // let opponent = game.brains[game.info.access].get(me.data.opponent)
-        // me.setData({terminate: true})
-        // opponent.setData({terminate: true})
+        let me = game.brains[game.info.access].get(game.me.username)
+        me.setData({health: -1000})
       } 
+    }
+
+    function beginGame(){
+      game.brains[game.info.access].get(game.me.username).data = {};
+      game.brains[game.info.access].get(game.me.username).data.ready = true;
     }
 
     function assignOpponent(game) {
@@ -220,6 +238,7 @@
             let data = game.brains[game.info.access].get(username).data
             if (data.opponent === condition && data.ready){
               opp = username
+              console.log('new opponent: ',opp)
               break loop1
             }
         }
