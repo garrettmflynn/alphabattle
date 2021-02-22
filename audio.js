@@ -32,8 +32,8 @@ class music {
   
    updateDetune(health, healthInit){
      if (this.health <= this.healthInit) {
-     this.drone[1].freq(2 * this.root + 10 * (1 - exp(-(1 / 100) * (this.healthInit - this.health) / 0.4)) + 0.125);
-     this.drone[2].freq(3*this.root + 4*(1-exp(-(1/100)*(this.healthInit - this.health)/0.4)) - 0.125);
+     this.drone[1].freq(2 * this.root + 10 * (1 - exp((1 / 40) * (this.health - this.healthInit)) + 0.125);
+     this.drone[2].freq(3 * this.root + 4 * (1 - exp((1 / 40) * (this.health - this.healthInit)) - 0.125);
    }
  }
 }
