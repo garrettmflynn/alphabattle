@@ -13,6 +13,7 @@
   let setReady = false;
   let opponent;
   let lastOppHealth;
+  let pendingState;
 
   let margin = 100;
   let hasUserId = false;
@@ -160,9 +161,13 @@
         message.center()
         message.style('opacity','0.8')
         startTime = Date.now()
-      } else if (startTime != undefined){
+      } else if (startTime !== undefined){
          if (Date.now() - startTime > displayTime*1000){
             startTime = undefined;
+            if (pendingState!== undefined){
+              state = pendingState
+              pendingState == undefined
+            }
             message.style('opacity','0')
           }
       }
@@ -527,5 +532,8 @@
     }
 
     function switchState(newState){
-      state = newState
+      pendingState = newState
+      message.html('')
+      message.style('opacity','1')
+      startTime = Date.now()-Math.min((displayTime*1000)-500,(displayTime*1000))
     }
