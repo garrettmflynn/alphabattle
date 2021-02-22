@@ -21,7 +21,7 @@
       connectToggle.position(windowWidth-25-connectToggle.width, windowHeight-50-connectToggle.height);
       disconnectToggle.position(windowWidth-25-disconnectToggle.width, windowHeight-50-disconnectToggle.height);
       museToggle.position(windowWidth-25-museToggle.width, windowHeight-50-museToggle.height);
-      beginGameToggle.position((windowWidth/2)-museToggle.width, (windowHeight/2)-museToggle.height);
+      beginGameToggle.position((windowWidth/2)-beginGameToggle.width/2, (3*windowHeight/4)-beginGameToggle.height);
       disconnectToggle.hide()
       connectToggle.hide()
       beginGameToggle.hide()
@@ -131,15 +131,16 @@
         termFlag = true;
       }
 
-      ellipse(marg-ellipseRad/2, marg + (2.5*ellipseRad)*ind-ellipseRad/2, ellipseRad)
+      let centerY = windowHeight/2 - (marg/2)
+      let centerX = (windowWidth/2) + (marg)*((2*ind-1))
+
+      ellipse(centerX-(2*ind-1)*ellipseRad/2, centerY-ellipseRad/2, ellipseRad)
       
       fill(100,100,100)
-      ellipse(marg, marg + (2.5*ellipseRad)*ind, 2*ellipseRad)
+      ellipse(centerX, centerY, 2*ellipseRad)
 
       // User Text
       fill('white')
-      textAlign(LEFT);
-      text(user.username + ' vs ' + user.data.opponent, marg + ellipseRad + 10, marg + (2.5*ellipseRad)*ind)
       textAlign(CENTER);
       let health;
       if (user.data.health === undefined){
@@ -147,9 +148,27 @@
       } else {
         health = user.data.health.toFixed(1)
       }
-      text(health, marg, marg + (2.5*ellipseRad)*ind)
+      text(health, centerX, centerY)
     }
     })
+
+    if (me !== undefined || opponent !== undefined){
+      fill('white')
+      textStyle(BOLD)
+      textAlign(CENTER);
+      text('vs', windowWidth/2, windowHeight/2)
+      if (me !== undefined){
+        textAlign(RIGHT);
+        text(me.username, (windowWidth/2) + (marg)*(-1), windowHeight/2)
+      }
+      if (opponent !== undefined && opponent.data.ready){
+        textAlign(LEFT);
+        text(opponent.username, (windowWidth/2) + (marg)*(+1), windowHeight/2)
+      }
+
+      // fill('white')
+      // text(me.username + ' vs ' + opponent.username, windowWidth/2, windowHeight/2)
+    }
 
     if (termFlag){
       // TERMINATE GAME
@@ -164,7 +183,7 @@
       connectToggle.position(windowWidth-25-connectToggle.width, windowHeight-50-connectToggle.height);
       disconnectToggle.position(windowWidth-25-disconnectToggle.width, windowHeight-50-disconnectToggle.height);
       museToggle.position(windowWidth-25-museToggle.width, windowHeight-50-museToggle.height);
-      beginGameToggle.position((windowWidth/2)-museToggle.width, (windowHeight/2)-museToggle.height);
+      beginGameToggle.position((windowWidth/2)-beginGameToggle.width/2, (3*windowHeight/4)-beginGameToggle.height);
     }
 
     keyPressed = () => {
