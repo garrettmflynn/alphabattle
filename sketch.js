@@ -159,7 +159,7 @@
         disconnect()
         toDisconnect = false;
         message.center()
-        message.style('opacity','0.8')
+        message.style('opacity','1')
         startTime = Date.now()
       } else if (startTime !== undefined){
          if (Date.now() - startTime > displayTime*1000){
@@ -169,6 +169,7 @@
               pendingState == undefined
             }
             message.style('opacity','0')
+            message.html('')
           }
       }
 
@@ -533,7 +534,6 @@
 
     function switchState(newState){
       pendingState = newState
-      message.html('')
       message.style('opacity','1')
       startTime = Date.now()-Math.min((displayTime*1000)-500,(displayTime*1000))
     }
