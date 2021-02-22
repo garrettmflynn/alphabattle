@@ -421,7 +421,7 @@
         // Get Voltage Amplitude
         let me = game.brains[game.info.access].get(game.me.username)
          if (me !== undefined){
-        let voltage = me.getVoltage();
+        let contactQuality = me.contactQuality();
         let voltageNorm = me.getVoltage(true);
         me.usedChannels.forEach((channelDict,ind) => {
             let [x, y, z] = me.eegCoordinates[channelDict.name]
@@ -429,9 +429,7 @@
             let centerX = x*(headWidth/150) + (windowWidth / 2)
             let centerY = -y*(headWidth/150) + windowHeight / 2
                    
-            let buffer = voltage[channelDict.index]
-            let aveAmp = buffer.reduce((a, b) => a + Math.abs(b), 0) / buffer.length;
-            buffer = voltageNorm[channelDict.index]
+            let buffer = voltageNorm[channelDict.index]
             let voltageScaling = 50
             let signalWidth = 150
     
@@ -446,16 +444,16 @@
     
       // Colored Line
     stroke(
-      255*(aveAmp/100), // Red
-      255*(1-aveAmp/100), // Green
+      255*(contactQuality[channelDict.index]/100), // Red
+      255*(1-contactQuality[channelDict.index]/100), // Green
         0
       )
     
         for (let sample = 0; sample < buffer.length; sample++){
            line(centerX + (signalWidth*(sample/buffer.length) - signalWidth/2), 
-                centerY - voltageScaling*buffer[sample],
+                centerY - voltageScaling*(buffer[sample]-0.5),
                 centerX + (signalWidth*((sample+1)/buffer.length) - signalWidth/2), 
-                centerY - voltageScaling*buffer[sample+1]
+                centerY - voltageScaling*(buffer[sample+1]-0.5)
                )   
         }
         
@@ -463,9 +461,9 @@
         noStroke()
         textSize(10)
         fill('white')
-        text(aveAmp.toFixed(1) + ' uV',
+        text(contactQuality[channelDict.index].toFixed(1) + ' uV',
           centerX,
-          centerY + (40*(1+voltageScaling))
+          centerY + 40
              )       
            })
          }
