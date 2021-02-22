@@ -422,6 +422,7 @@
         let me = game.brains[game.info.access].get(game.me.username)
          if (me !== undefined){
         let voltage = me.getVoltage();
+        let voltageNorm = me.getVoltage(true);
         me.usedChannels.forEach((channelDict,ind) => {
             let [x, y, z] = me.eegCoordinates[channelDict.name]
             
@@ -430,8 +431,9 @@
                    
             let buffer = voltage[channelDict.index]
             let aveAmp = buffer.reduce((a, b) => a + Math.abs(b), 0) / buffer.length;
-            let voltageScaling = (headWidth/150)/10
-            let signalWidth = 50*(1+voltageScaling)
+            buffer = voltageNorm[channelDict.index]
+            let voltageScaling = 50
+            let signalWidth = 150
     
     // Zero Line
     stroke(255)
