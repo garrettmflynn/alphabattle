@@ -5,6 +5,8 @@
   let input;
   let greeting;
   let message;
+  let title;
+
   let margin = 100;
   let hasUserId = false;
   let easing = 0.1;
@@ -46,26 +48,30 @@
       greeting = createElement('p', 'What is your name?');
       greeting.position(windowWidth-input.width-50, windowHeight-50-2.5*disconnectToggle.height-40);
 
-      // Brains@Play Setup
+      message = createElement('div')
+      message.html(`<h1>You Won!</h1>
+      <p>Great Job</p>`)
+      message.hide()
+
+      title = createElement('div')
+      title.html(`<h1>AlphaBattle</h1>
+      <p>Fight to the Death with your Brains 🤯</p>`)
+      title.center();
+      title.hide()
+
       museToggle.mousePressed(async () => {
+
+          //Audio
+          audioToggle.hide();
+          audioOffToggle.show();
+          snd.startDrone();
+          snd.setVolume(volMain);
+
+          // BLE
           await game.bluetooth.devices['muse'].connect()
           game.connectBluetoothDevice()
           connectToggle.show()
       });
-
-      //Audio Setup
-      audioToggle.mousePressed(() =>{
-        audioToggle.hide();
-        audioOffToggle.show();
-        snd.startDrone();
-        snd.setVolume(volMain);
-      })    
-
-      audioOffToggle.mousePressed(() =>{
-        audioOffToggle.hide();
-        audioToggle.show();
-        snd.stop(volMain);
-      })    
 
       connectToggle.mousePressed(() => {
         if (input.value() !== ''){
@@ -192,10 +198,10 @@
   }
 }
 
+    let centerY = windowHeight/2 - (margin/2);
+
     // Create Me and Opponent Markers
     [me,opponent].forEach( async (user,ind) => {
-
-      let centerY = windowHeight/2 - (margin/2)
       let centerX = (windowWidth/2) + (margin)*((2*ind-1))
       let barScale = ((windowWidth/2) - 2*margin)/100
 
@@ -237,13 +243,10 @@
 
     if (me !== undefined || opponent !== undefined){
       fill('white')
-      textStyle(BOLD)
-      textAlign(CENTER);
-      textSize(50)
-      text('AlphaBattle', windowWidth/2, windowHeight/4)
       textStyle(NORMAL)
-      textSize(15)
-      text('Fight to the Death with your Brains 🤯', windowWidth/2, windowHeight/4 + 50)
+      textAlign(CENTER,CENTER);
+      textSize(20)
+      text('vs', windowWidth/2, centerY - barHeight/2)
       if (me !== undefined){
         textAlign(RIGHT);
         textSize(15)
@@ -273,6 +276,7 @@
     beginGameToggle.position((windowWidth/2)-beginGameToggle.width/2, (3*windowHeight/4)-beginGameToggle.height);
     input.position(windowWidth-input.width-50, windowHeight-50-2.5*disconnectToggle.height);
     greeting.position(windowWidth-input.width-50, windowHeight-50-2.5*disconnectToggle.height-40);
+    message.center();
   }
 
     mouseClicked = () => {
