@@ -70,7 +70,7 @@ h4{
           min-height: 50px;
           cursor: pointer;
           color: whitesmoke;
-          background: black;
+          background: transparent;
           font-family: inherit;
           display: flex;
           justify-content: center;

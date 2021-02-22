@@ -6,6 +6,9 @@
   let greeting;
   let message;
   let title;
+  var bandpowers = [];
+  var bufferArrays;
+  var colors;
   let state = 0;
 
   let margin = 100;
@@ -14,6 +17,7 @@
   let displayTime = 2;
   let startTime;
   let toDisconnect = false;
+  var bandNames = ['delta', 'theta', 'alpha', 'beta', 'gamma']
 
   let barHeight = 50;
   let root = 52.125;
@@ -34,7 +38,7 @@
       disconnectToggle = createButton('Disconnect');
       connectToggle.position(windowWidth-25-connectToggle.width, windowHeight-50-connectToggle.height);
       disconnectToggle.position(windowWidth-25-disconnectToggle.width, windowHeight-50-disconnectToggle.height);
-      museToggle.position(windowWidth-25-museToggle.width, windowHeight-50-museToggle.height);
+      museToggle.position(windowWidth/2-(museToggle.width/2), windowHeight/2-(museToggle.height/2));
       beginGameToggle.position((windowWidth/2)-beginGameToggle.width/2, (3*windowHeight/4)-beginGameToggle.height);
       disconnectToggle.hide()
       connectToggle.hide()
@@ -43,10 +47,11 @@
       // Name
       input = createInput();
       input.position(windowWidth-input.width-50, windowHeight-50-2.5*disconnectToggle.height);
-      input.show()
+      input.hide()
 
       greeting = createElement('p', 'What is your name?');
       greeting.position(windowWidth-input.width-50, windowHeight-50-2.5*disconnectToggle.height-40);
+      greeting.hide()
 
       message = createElement('div')
       message.style('text-align','center')
@@ -69,6 +74,10 @@
           await game.bluetooth.devices['muse'].connect()
           game.connectBluetoothDevice()
           connectToggle.show()
+          input.show()
+          greeting.show()
+          state = 1
+
           //Audio
           snd.startDrone(volMain);
       });
@@ -80,14 +89,19 @@
         } else { 
           game.connect({'guestaccess': true})
         }
+
+          state = 2
           disconnectToggle.show()
           connectToggle.hide()
+          input.hide()
+          greeting.hide()
           museToggle.hide()
           beginGameToggle.show()
       });
     
       disconnectToggle.mousePressed(() => {
           disconnect()
+          state = 1
       })
 
       beginGameToggle.mousePressed(() => {
@@ -102,6 +116,25 @@
 
       // museToggle.hide()
       // connectToggle.show()
+
+      // Manage Bands
+      bandNames.forEach((bandname) => {
+        bandpowers[bandname] = Array.from(Object.keys(game.eegCoordinates), channelName => {
+          return Array(500).fill(0)
+        })
+      })
+      colors = [
+        // color(25, 113, 118), // Skobeloff
+        // color(255, 194, 180), // Melon
+        // color(251, 143, 103), // Coral
+        // color(248, 225, 108), // Naples Yellow
+        // color(172, 32, 53) // Crimson UA
+        color('red'), // Skobeloff
+        color('orange'), // Melon
+        color('yellow'), // Coral
+        color('green'), // Naples Yellow
+        color('cyan') // Crimson UA
+      ]
     }
     
     draw = () => {
@@ -115,21 +148,39 @@
       // Update Voltage Buffers and Derived Variables
       game.update();
 
-      console.log(state)
-
-
+      // Pick Visualization
       if (state === 0){
-        playGame()
-      } else {
+        bandInspector()
+      } else if (state === 1) {
         voltageInspector()
+      } else {
+        playGame()
       }
+
+      // Update Message
+      if (toDisconnect){
+        disconnect()
+        toDisconnect = false;
+        message.center()
+        message.style('opacity','1')
+        startTime = Date.now()
+      } else if (startTime != undefined){
+         if (Date.now() - startTime > displayTime*1000){
+            startTime = undefined;
+            message.style('opacity','0')
+          }
+      }
+
+
+
+
     }
     
   windowResized = () => {
     resizeCanvas(windowWidth,windowHeight)
     connectToggle.position(windowWidth-25-connectToggle.width, windowHeight-50-connectToggle.height);
     disconnectToggle.position(windowWidth-25-disconnectToggle.width, windowHeight-50-disconnectToggle.height);
-    museToggle.position(windowWidth-25-museToggle.width, windowHeight-50-museToggle.height);
+    museToggle.center();
     beginGameToggle.position((windowWidth/2)-beginGameToggle.width/2, (3*windowHeight/4)-beginGameToggle.height);
     input.position(windowWidth-input.width-50, windowHeight-50-2.5*disconnectToggle.height);
     greeting.position(windowWidth-input.width-50, windowHeight-50-2.5*disconnectToggle.height-40);
@@ -182,6 +233,8 @@
       game.disconnect()
       disconnectToggle.hide()
       connectToggle.show()
+      input.show()
+      greeting.show()
       // museToggle.show()
       beginGameToggle.hide()
       game.brains[game.info.access].get(game.me.username).data = {};
@@ -196,18 +249,7 @@
             }
       
             // Try to Assign Opponents (if connected to server)
-            if (toDisconnect){
-              disconnect()
-              toDisconnect = false;
-              message.center()
-              message.style('opacity','1')
-              startTime = Date.now()
-            } else if (startTime != undefined){
-               if (Date.now() - startTime > displayTime*1000){
-                  startTime = undefined;
-                  message.style('opacity','0')
-                }
-            } else{
+            if (!toDisconnect && startTime === undefined) {
             if (game.connection.status){
             if (me !== undefined){
               if (me.data.ready){
@@ -377,11 +419,11 @@
       ellipse(windowWidth / 2 - 75, windowHeight / 2 + 20, headWidth/10,headWidth/5) // Right Ear
     
         // Get Voltage Amplitude
-        let brain = game.brains[game.info.access].get(game.me.username)
-         if (brain !== undefined){
-        let voltage = brain.getVoltage();
-        brain.usedChannels.forEach((channelDict,ind) => {
-            let [x, y, z] = brain.eegCoordinates[channelDict.name]
+        let me = game.brains[game.info.access].get(game.me.username)
+         if (me !== undefined){
+        let voltage = me.getVoltage();
+        me.usedChannels.forEach((channelDict,ind) => {
+            let [x, y, z] = me.eegCoordinates[channelDict.name]
             
             let centerX = x*(headWidth/150) + (windowWidth / 2)
             let centerY = -y*(headWidth/150) + windowHeight / 2
@@ -392,7 +434,7 @@
             let signalWidth = 50*(1+voltageScaling)
     
     // Zero Line
-    stroke(255,255,255)
+    stroke(255)
     line(centerX - (signalWidth+10)/2, 
       centerY,
       centerX + (signalWidth+10) - (signalWidth+10)/2, 
@@ -425,4 +467,71 @@
              )       
            })
          }
+    }
+
+    function bandInspector() {
+      background(0);
+      noStroke()
+      fill(50, 50, 50)
+      let headWidth = windowWidth / 2
+      ellipse(windowWidth / 2, windowHeight / 2 + 20, headWidth, headWidth + headWidth * (1 / 6)) // Head
+      ellipse(windowWidth / 2, windowHeight / 2 - (headWidth + headWidth * (1 / 6) - 50) / 2, headWidth / 10) // Nose
+      ellipse(windowWidth / 2 + 75, windowHeight / 2 + 20, headWidth / 10, headWidth / 5) // Left Ear
+      ellipse(windowWidth / 2 - 75, windowHeight / 2 + 20, headWidth / 10, headWidth / 5) // Right Ear
+
+      // Get Brain Data
+      let me = game.brains[game.info.access].get(game.me.username)
+      let toCenter = (windowWidth/2) - 125
+      if (me !== undefined) {
+        Object.keys(bandpowers).forEach((bandName, bandInd) => {
+    
+          fill(255)
+          text(bandName,100+toCenter,50 + 50*bandInd)
+          me.getMetric(bandName).then((bandDict) => {
+    
+            fill(colors[bandInd])
+            noStroke()
+            text(bandDict.average.toFixed(3),100+50+toCenter,50 + 50*bandInd)
+            noFill()
+            bandDict.channels.forEach((val, channel) => {
+              bandpowers[bandName][channel].shift()
+              bandpowers[bandName][channel].push(val)
+            })
+    
+            // let voltage = brain.getVoltage();
+            me.usedChannels.forEach((channelDict, ind) => {
+              let [x, y, z] = me.eegCoordinates[channelDict.name]
+    
+              let centerX = x * (headWidth / 150) + (windowWidth / 2)
+              let centerY = -y * (headWidth / 150) + (windowHeight / 2)
+    
+              let buffer = bandpowers[bandName][channelDict.index] // might need to rename buffer
+              let aveAmp = buffer.reduce((a, b) => a + Math.abs(b), 0) / buffer.length;
+              let voltageScaling = -25
+              let signalWidth = 100
+              
+              // Zero Line
+              strokeWeight(1)
+              stroke(255)
+              line(centerX - (signalWidth + 10) / 2,
+                centerY,
+                centerX + (signalWidth + 10) - (signalWidth + 10) / 2,
+                centerY
+              )
+    
+    
+              // Colored Line
+              stroke(colors[bandInd])
+    
+              for (let sample = 0; sample < buffer.length; sample++) {
+                line(centerX + (signalWidth * (sample / buffer.length) - signalWidth / 2),
+                  centerY + voltageScaling * buffer[sample],
+                  centerX + (signalWidth * ((sample + 1) / buffer.length) - signalWidth / 2),
+                  centerY + voltageScaling * buffer[sample + 1]
+                )
+              }
+            })
+          });
+        })
+      }
     }
