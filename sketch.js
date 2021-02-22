@@ -2,9 +2,12 @@
   let connectToggle;
   let disconnectToggle;
   let museToggle;
+  let beginGameToggle;
+  let input;
+  let greeting;
   let margin = 100;
-  let input 
   let hasUserId = false;
+  let easing = 0.1;
 
   setup = () => {
 
@@ -52,11 +55,7 @@
       });
     
       disconnectToggle.mousePressed(() => {
-          game.disconnect()
-          disconnectToggle.hide()
-          connectToggle.show()
-          museToggle.show()
-          beginGameToggle.hide()
+          disconnect()
       })
 
       beginGameToggle.mousePressed(() => {
@@ -118,37 +117,41 @@
 
       if (opponent === undefined){
         console.log('opponent left server')
-        me.data = initializeData()
-        beginGameToggle.show()
+        disconnect()
+        // me.data = initializeData()
+        // beginGameToggle.show()
       }  
       // Reset if Opponent Dies
       else if (opponent.data.health === 0){
         console.log('opponent flatlined')
-        opponent.data = initializeData()
-        console.log(me.data)
-        me.data = initializeData()
-        console.log(me.data)
-        beginGameToggle.show()
-      } else if (me.data.health === 0){
-        // Reset if You Died
-        opponent.data = initializeData()
-        console.log(me.data)
-        me.data = initializeData()
-        console.log(me.data)
+        disconnect()
+        // opponent.data = initializeData()
+        // me.data = initializeData()
+        // beginGameToggle.show()
+      } 
+      // Reset if You Died
+      else if (me.data.health === 0){
         console.log('you flatlined. resetting...')
-        beginGameToggle.show()
+        disconnect()
+        // opponent.data = initializeData()
+        // me.data = initializeData()
+        // beginGameToggle.show()
       }
       // Keep On Battling!
       else if (me.data.health !== undefined) {
-        console.log('battling')
-      // let attack = me.getMetric('beta')
-      // let defense = me.getMetric('alpha')
-      // let val = attack.average
-      let attack = Math.random()*20
-      let defense =  Math.random()*20
-      let val = attack
+        let val;
+        let attack;
+        let defense;
+      if (game.bluetooth.status){
+        attack = me.getMetric('beta')
+        defense = me.getMetric('alpha')
+        val = attack.average
+      } else {
+        attack = noise(Date.now()/1000)*10
+        defense =  noise(Date.now()/1000 + 1000)*10
+        val = attack
+      }
       me.data.attack = val
-
       let diff = defense - opponent.data.attack
       if (!isNaN(diff)){
         if (me.data.health + diff >= 0 && me.data.health + diff <= 100){
@@ -191,17 +194,20 @@
       fill('white')
       textSize(15)
       textAlign(CENTER);
-        let currentColor;
+      let currentColor;
       let health;
-      if (user.data.health === undefined){
-      } else {
+      if (user.data.health !== undefined){
         health = user.data.health
-        let colorScaling = ((100-health)/100)
+        if (user.easedHealth === undefined){
+          user.easedHealth = health
+        }
+        user.easedHealth += (health - user.easedHealth)*easing
+        let colorScaling = ((100-user.easedHealth)/100)
         currentColor = color(100 + 155*(colorScaling),100+ 155*(1-colorScaling),100+ 155*(1-colorScaling))
         currentColor.setAlpha(155)
         noStroke()
         fill(currentColor)
-        rect(centerX,centerY,(2*ind-1)*health*barScale,10)
+        rect(centerX,centerY,(2*ind-1)*user.easedHealth*barScale,10)
       }
     }
     noFill()
@@ -243,14 +249,9 @@
     }
 
     mouseClicked = () => {
-      console.log('mouse pressed')
     }
 
     keyPressed = () => {
-      if (keyCode === RETURN) {
-        me = game.brains[game.info.access].get(game.me.username)
-        me.setData({health: -1000})
-      } 
     }
 
     function getOpponent(game,me) {
@@ -283,4 +284,13 @@
         attack: undefined,
         health: undefined,
       }
+    }
+
+    function disconnect(){
+      game.disconnect()
+      disconnectToggle.hide()
+      connectToggle.show()
+      // museToggle.show()
+      beginGameToggle.hide()
+      game.brains[game.info.access].get(game.me.username).data = {};
     }
