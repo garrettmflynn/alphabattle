@@ -12,6 +12,8 @@
   let state = 0;
   let setReady = false;
   let opponent;
+  let lastOppHealth;
+  let pendingState;
 
   let margin = 100;
   let hasUserId = false;
@@ -25,9 +27,12 @@
   let root = 52.125;
   let nVel = 0.8;
   let volMain = 0.8;
-  let dTime = 20;
   let snd = new music(root, volMain);
   let effects = new sfx(root,nVel);
+  let dTime = 200;
+  let lastAlertTime = 0;
+  let firstAlert = 0;
+  let healthDrop = -3;
 
   setup = () => {
 
@@ -64,7 +69,7 @@
       message.style('height','100vh')
       message.style('background','black')
       message.style('z-index','50')
-      message.style('opacity','1')
+      message.style('opacity','0.8')
       message.style('transition','0.5s ease-in-out')
       message.style('pointer-events','none')
       message.center();
@@ -78,7 +83,7 @@
           connectToggle.show()
           input.show()
           greeting.show()
-          state = 1
+          switchState(1)
 
           //Audio
           snd.startDrone(volMain);
@@ -93,7 +98,7 @@
           dict = {'guestaccess': true}
         }          
         game.connect(dict).then(res => {
-          state = 2
+          switchState(2)
           disconnectToggle.show()
           connectToggle.hide()
           input.hide()
@@ -107,9 +112,6 @@
       disconnectToggle.mousePressed(() => {
         disconnect()
     })
-
-      // museToggle.hide()
-      // connectToggle.show()
 
       // Manage Bands
       bandNames.forEach((bandname) => {
@@ -129,6 +131,10 @@
         color('green'), // Naples Yellow
         color('cyan') // Crimson UA
       ]
+
+      // UNCOMMENT TO SKIP MUSE CONNECTION
+      // museToggle.hide()
+      // connectToggle.show()
     }
     
     draw = () => {
@@ -158,10 +164,15 @@
         message.center()
         message.style('opacity','1')
         startTime = Date.now()
-      } else if (startTime != undefined){
+      } else if (startTime !== undefined){
          if (Date.now() - startTime > displayTime*1000){
             startTime = undefined;
+            if (pendingState!== undefined){
+              state = pendingState
+              pendingState == undefined
+            }
             message.style('opacity','0')
+            message.html('')
           }
       }
 
@@ -187,7 +198,7 @@
     keyPressed = () => {
       let keys = [49,50,51]
       if (keys.includes(keyCode)){
-        state = keys.indexOf(keyCode)
+        switchState(keys.indexOf(keyCode))
       }
     }
 
@@ -231,7 +242,7 @@
       // museToggle.show()
       beginGameToggle.hide()
       game.brains[game.info.access].get(game.me.username).data = {};
-      state = 1
+      switchState(1)
     }
 
     function playGame(){
@@ -304,6 +315,7 @@
             me.data.attack = val
             let diff = defense - opponent.data.attack
             if (!isNaN(diff)){
+              
               if (me.data.health + diff >= 0 && me.data.health + diff <= 100){
                 // Only let health go down
                 if (diff < 0){
@@ -314,13 +326,22 @@
               } else {
                 me.data.health = 100;  
               }
+
+              lastOppHealth = opponent.data.health
       
-              //giving an alert sound if health drops at a threshold rate or higher:
-              if(diff < -5){
-                console.log('health dropped')
-                effects.playAlert(nVel);
-              }
-              snd.updateDetune(me.data.health, 100);
+            //giving an alert sound if health drops at a threshold rate or higher:
+            if(diff < healthDrop){
+              console.log('alert')
+              if(!firstAlert){
+              lastAlertTime = Date.now();
+              firstAlert = 1;  
+              }  
+              if(abs(Date.now() - lastAlertTime - dTime) < 10){
+              effects.playAlert(nVel);
+              lastAlertTime = Date.now();
+              }  
+            }  
+            snd.updateDetune(me.data.health, 100);
             }
           }
           }        
@@ -472,12 +493,12 @@
         Object.keys(bandpowers).forEach((bandName, bandInd) => {
     
           fill(255)
-          text(bandName,100+toCenter,50 + 50*bandInd)
+          text(bandName,110+toCenter,50 + 50*bandInd)
           me.getMetric(bandName).then((bandDict) => {
     
             fill(colors[bandInd])
             noStroke()
-            text(bandDict.average.toFixed(3),100+50+toCenter,50 + 50*bandInd)
+            text(bandDict.average.toFixed(3),110+50+toCenter,50 + 50*bandInd)
             noFill()
             bandDict.channels.forEach((val, channel) => {
               bandpowers[bandName][channel].shift()
@@ -520,4 +541,10 @@
           });
         })
       }
+    }
+
+    function switchState(newState){
+      pendingState = newState
+      message.style('opacity','1')
+      startTime = Date.now()-Math.min((displayTime*1000)-500,(displayTime*1000))
     }
