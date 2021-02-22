@@ -23,11 +23,6 @@
       // P5 Setup
       createCanvas(windowWidth, windowHeight);
       textAlign(CENTER, CENTER);
-      audioOffToggle = createButton('Pause Audio');
-      audioOffToggle.position(windowWidth*(4/5), windowHeight/10);
-      audioToggle = createButton('Start Audio');
-      audioToggle.position(windowWidth*(4/5), windowHeight/10);
-      audioOffToggle.hide();
       connectToggle = createButton('Connect to Server');
       beginGameToggle = createButton('Begin Game');
       museToggle = createButton('Connect Muse');
@@ -51,6 +46,7 @@
       message = createElement('div')
       message.html(`<h1>You Won!</h1>
       <p>Great Job</p>`)
+      message.center();
       message.hide()
 
       title = createElement('div')
@@ -198,7 +194,7 @@
   }
 }
 
-    let centerY = windowHeight/2 - (margin/2);
+    let centerY = windowHeight/2;
 
     // Create Me and Opponent Markers
     [me,opponent].forEach( async (user,ind) => {
@@ -251,9 +247,9 @@
         textAlign(RIGHT);
         textSize(15)
         if (hasUserId){
-          text(me.username, (windowWidth/2) + (margin)*(-1), windowHeight/2)
+          text(me.username, (windowWidth/2) + (margin)*(-1), windowHeight/2  + (margin/4))
         } else {
-          text('me', (windowWidth/2) + (margin)*(-1), windowHeight/2)
+          text('me', (windowWidth/2) + (margin)*(-1), windowHeight/2  + (margin/4))
         }
       }
       if (opponent !== undefined && opponent.data && opponent.data.ready){
