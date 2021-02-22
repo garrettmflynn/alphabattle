@@ -52,10 +52,10 @@ class sfx {
     this.alert[2].start(0, this.root * (2 * 1.06));
     this.alert[3].start(0, this.root * (4 * 1.06));
 
-    this.alert[0].amp(this.nVel, 0.08);
-    this.alert[1].amp(this.nVel / 3, 0.08);
-    this.alert[2].amp(this.nVel / 6, 0.08);
-    this.alert[3].amp(this.nVel / 8, 0.08);
+    this.alert[0].amp(nVel, 0.08);
+    this.alert[1].amp(nVel / 3, 0.08);
+    this.alert[2].amp(nVel / 6, 0.08);
+    this.alert[3].amp(nVel / 8, 0.08);
 
     this.alert[0].stop(0.3);
     this.alert[1].stop(0.3);
