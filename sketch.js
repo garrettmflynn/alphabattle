@@ -462,13 +462,13 @@
         }
         
         // Text Label
-        noStroke()
-        textSize(10)
-        fill('white')
-        text(contactQuality[channelDict.index].toFixed(1) + ' uV',
-          centerX,
-          centerY + 40
-             )       
+        // noStroke()
+        // textSize(10)
+        // fill('white')
+        // text(contactQuality[channelDict.index].toFixed(1) + ' uV',
+        //   centerX,
+        //   centerY + 40
+        //      )       
            })
          }
     }
