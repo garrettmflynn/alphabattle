@@ -10,6 +10,10 @@
   let margin = 100;
   let hasUserId = false;
   let easing = 0.1;
+  let displayTime = 2;
+  let startTime;
+  let toDisconnect = false;
+
   let barHeight = 50;
   let root = 52.125;
   let nVel = 0.8;
@@ -44,26 +48,19 @@
       greeting.position(windowWidth-input.width-50, windowHeight-50-2.5*disconnectToggle.height-40);
 
       message = createElement('div')
-      message.html(`<h1>You Won!</h1>
-      <p>Great Job</p>`)
+      message.style('text-align','center')
       message.center();
       message.hide()
 
-      title = createElement('div')
-      title.html(`<h1>AlphaBattle</h1>
-      <p>Fight to the Death with your Brains 🤯</p>`)
-      title.center();
-      title.hide()
-
-      museToggle.mousePressed(async () =>  {
-          //Audio
-          snd.startDrone();
-          snd.setVolume(volMain);
-          // BLE
-          await game.bluetooth.devices['muse'].connect()
-          game.connectBluetoothDevice()
-          connectToggle.show()
-      });
+      // museToggle.mousePressed(async () =>  {
+      //     //Audio
+      //     // snd.startDrone();
+      //     // snd.setVolume(volMain);
+      //     // BLE
+      //     await game.bluetooth.devices['muse'].connect()
+      //     game.connectBluetoothDevice()
+      //     connectToggle.show()
+      // });
 
       connectToggle.mousePressed(() => {
         if (input.value() !== ''){
@@ -92,8 +89,8 @@
         beginGameToggle.hide()
       })
 
-      // museToggle.hide()
-      // connectToggle.show()
+      museToggle.hide()
+      connectToggle.show()
     }
     
     draw = () => {
@@ -115,6 +112,15 @@
       }
 
       // Try to Assign Opponents (if connected to server)
+      if (toDisconnect){
+        disconnect()
+        toDisconnect = false;
+      } else if (startTime != undefined){
+         if (Date.now() - startTime > displayTime*1000){
+            startTime = undefined;
+            message.hide();
+         }
+      } else{
       if (game.connection.status){
       if (me !== undefined){
         if (me.data.ready){
@@ -134,14 +140,24 @@
 
       if (opponent === undefined){
         console.log('opponent left server')
-        disconnect()
+        toDisconnect = true;
+        message.html(`<h3>Opponent Left Server</h1>
+      <p>Get back in there!</p>`)
+      message.center()
+      message.show()
+      startTime = Date.now()
         // me.data = initializeData()
         // beginGameToggle.show()
       }  
       // Reset if Opponent Dies
       else if (opponent.data.health === 0){
         console.log('opponent flatlined')
-        disconnect()
+        toDisconnect = true;
+        message.html(`<h3>You Won</h1>
+      <p>Great job!</p>`)
+      message.center()
+      message.show()
+      startTime = Date.now()
         // opponent.data = initializeData()
         // me.data = initializeData()
         // beginGameToggle.show()
@@ -149,7 +165,12 @@
       // Reset if You Died
       else if (me.data.health === 0){
         console.log('you flatlined. resetting...')
-        disconnect()
+        toDisconnect = true;
+        message.html(`<h3>You Flatlined...</h1>
+      <p>Better luck next time!</p>`)
+      message.center()
+      message.show()
+      startTime = Date.now()
         // opponent.data = initializeData()
         // me.data = initializeData()
         // beginGameToggle.show()
@@ -189,6 +210,7 @@
   }
   }
 }
+      }
 
     let centerY = windowHeight/2;
 
@@ -252,9 +274,9 @@
         textAlign(LEFT);
         textSize(15)
         if (opponent.username.match(/\w\w\w\w\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w\w\w\w\w\w\w\w\w/)){
-        text('guest', (windowWidth/2) + (margin)*(+1), windowHeight/2)
+        text('guest', (windowWidth/2) + (margin)*(+1), windowHeight/2  + (margin/4))
         } else {
-          text(opponent.username, (windowWidth/2) + (margin)*(+1), windowHeight/2)
+          text(opponent.username, (windowWidth/2) + (margin)*(+1), windowHeight/2  + (margin/4))
         }
       }
     }
