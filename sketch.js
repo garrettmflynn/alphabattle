@@ -55,12 +55,10 @@
       title.center();
       title.hide()
 
-      museToggle.mousePressed(async () => {
-
+      museToggle.mousePressed(async () =>  {
           //Audio
           snd.startDrone();
           snd.setVolume(volMain);
-
           // BLE
           await game.bluetooth.devices['muse'].connect()
           game.connectBluetoothDevice()
