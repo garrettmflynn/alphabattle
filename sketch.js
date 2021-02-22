@@ -20,7 +20,7 @@
   let volMain = 0.8;
   let dTime = 20;
   let snd = new music(root, volMain);
-  //let effects = new sfx(root,nVel);
+  let effects = new sfx(root,nVel);
 
   setup = () => {
 
@@ -63,12 +63,12 @@
       startTime = Date.now() + 1000
 
       museToggle.mousePressed(async () =>  {
-          //Audio
-          snd.startDrone(volMain);
           // BLE
           await game.bluetooth.devices['muse'].connect()
           game.connectBluetoothDevice()
           connectToggle.show()
+          //Audio
+          snd.startDrone(volMain);
       });
 
       connectToggle.mousePressed(() => {
@@ -198,7 +198,6 @@
         if (me.data.health + diff >= 0 && me.data.health + diff <= 100){
           // Only let health go down
           if (diff < 0){
-            console.log(diff)
             me.data.health += diff
           }
         } else if (me.data.health + diff < 0){
@@ -208,7 +207,7 @@
         }
 
         //giving an alert sound if health drops at a threshold rate or higher:
-        if(diff < healthDrop){
+        if(diff < -5){
           console.log('health dropped')
           effects.playAlert(nVel);
         }
