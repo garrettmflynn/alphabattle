@@ -52,7 +52,7 @@
 
       beginGameToggle.mousePressed(() => {
         beginGameToggle.hide()
-        game.brains[game.info.access].get(game.me.username).data.ready = true;
+        beginGame()
       })
     }
     
@@ -88,26 +88,39 @@
       // Reset If Opponent Leaves
       else {
       if (opponent === undefined){
-        me.data = {opponent:undefined,health: undefined,ready:false}
+        terminateGame()
         beginGameToggle.show()
       }  
       // TERMINATE GAME
-      // else if (opponent.data.terminate){
-      //   me.data = {username:undefined,health: undefined,ready:false}
-      //   opponent.data = {username:undefined,health: undefined,ready:false}
-      //   beginGameToggle.show()
-      // }
+      else if (opponent.data.terminate){
+        terminateGame()
+        beginGameToggle.show()
+      }
       // Calculate Battle Outcomes
       else {
-      let attack = me.getMetric('beta')
-      let defense = me.getMetric('alpha')
+        console.log('battle')
+      // let attack = me.getMetric('beta')
+      // let defense = me.getMetric('alpha')
       // let val = attack.average
+      let attack = Math.random()*5
+      let defense =  Math.random()*5
       let val = attack
       me.setData({attack:val})
 
       let diff = defense - opponent.data.attack
       if (!isNaN(diff)){
-        me.data.health += diff
+        if (me.data.health + diff >= 0 && me.data.health + diff <= 100){
+          // Only let health go down
+          if (diff < 0){
+            me.data.health += diff
+          }
+        } else if (me.data.health + diff < 0){
+          me.data.health = 0;
+          terminateGame()
+          beginGameToggle.show()
+        } else {
+          me.data.health = 100;
+        }
       }
     }
     }
@@ -116,45 +129,44 @@
 }
 
     let termFlag = false;
+
     // Create Me and Opponent Markers
     [me,opponent].forEach( async (user,ind) => {
 
       if (user !== undefined){
 
       // Active Indicator
-      if (user.data.health === undefined){
-        fill(255,50,0)
-      } else if (user.data.health >= 0 || !user.data.ready){
-        fill(0,255,50)
-      } else {
-        fill(255,50,0)
-        termFlag = true;
-      }
+      // if (user.data.health === undefined){
+      //   fill(255,50,0)
+      // } else if (user.data.health >= 0 || !user.data.ready){
+      //   fill(0,255,50)
+      // } else {
+      //   fill(255,50,0)
+      //   termFlag = true;
+      // }
 
       let centerY = windowHeight/2 - (marg/2)
       let centerX = (windowWidth/2) + (marg)*((2*ind-1))
-
-      // ellipse(centerX-(2*ind-1)*ellipseRad/2, centerY-ellipseRad/2, ellipseRad)
-      // fill(100,100,100)
-      // ellipse(centerX, centerY, 2*ellipseRad)
-
       let barScale = ((windowWidth/2) - 2*marg)/100
 
       // User Text
       fill('white')
       textSize(15)
       textAlign(CENTER);
+        let c;
       let health;
       if (user.data.health === undefined){
         health = ''
-        fill(100)
+        c = color(100)
+        fill(c)
         rect(centerX-(2*ind-1)*ellipseRad/2,centerY-ellipseRad/2,(2*ind-1)*100*barScale,10)
       } else {
-        fill(255,50,0)
-        health = user.data.health.toFixed(1)
+        health = user.data.health
+        let colorScale = 155*(health/100)
+        c = color(100 - colorScale,100,100)
+        fill(c)
         rect(centerX-(2*ind-1)*ellipseRad/2,centerY-ellipseRad/2,(2*ind-1)*health*barScale,10)
       }
-      // text(health, centerX, centerY)
     }
     })
 
@@ -165,24 +177,22 @@
       textSize(50)
       text('vs', windowWidth/2, windowHeight/2)
       if (me !== undefined){
+        console.log('me',me.data)
         textAlign(RIGHT);
         textSize(15)
         text('me', (windowWidth/2) + (marg)*(-1), windowHeight/2)
       }
       if (opponent !== undefined && opponent.data.ready){
+        console.log('opponent',opponent.data)
         textAlign(LEFT);
         textSize(15)
         text(opponent.username, (windowWidth/2) + (marg)*(+1), windowHeight/2)
       }
-
-      // fill('white')
-      // text(me.username + ' vs ' + opponent.username, windowWidth/2, windowHeight/2)
     }
 
     if (termFlag){
-      // TERMINATE GAME
-      // me.data = {}
-      // beginGameToggle.show()
+      terminateGame()
+      beginGameToggle.show()
     }
   }
 
@@ -197,14 +207,28 @@
 
     keyPressed = () => {
       if (keyCode === RETURN) {
-
-        // TERMINATE GAME
-
-        // let me = game.brains[game.info.access].get(game.me.username)
-        // let opponent = game.brains[game.info.access].get(me.data.opponent)
-        // me.setData({terminate: true})
-        // opponent.setData({terminate: true})
+        terminateGame()
+        beginGameToggle.show()
       } 
+    }
+
+    function terminateGame(){
+      console.log('terminating game')
+
+      // me.data = {username:undefined,health: undefined,ready:false}
+      // opponent.data = {username:undefined,health: undefined,ready:false}
+
+      // OR 
+
+      let me = game.brains[game.info.access].get(game.me.username)
+      // let opponent = game.brains[game.info.access].get(me.data.opponent)
+      me.setData({terminate: true,ready: false,health:undefined})
+      // opponent.setData({terminate: true})
+    }
+
+    function beginGame(){
+      game.brains[game.info.access].get(game.me.username).data = {};
+      game.brains[game.info.access].get(game.me.username).data.ready = true;
     }
 
     function assignOpponent(game) {
