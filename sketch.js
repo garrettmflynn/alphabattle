@@ -1,6 +1,3 @@
-
-
-  
   let connectToggle;
   let disconnectToggle;
   let museToggle;
@@ -12,11 +9,23 @@
   let hasUserId = false;
   let easing = 0.1;
   let barHeight = 50;
+  let root = 52.125;
+  let nVel = 0.8;
+  let volMain = 0.8;
+  let dTime = 20;
+  let snd = new music(root, volMain);
+  //let effects = new sfx(root,nVel);
+
   setup = () => {
 
       // P5 Setup
       createCanvas(windowWidth, windowHeight);
       textAlign(CENTER, CENTER);
+      audioOffToggle = createButton('Pause Audio');
+      audioOffToggle.position(windowWidth*(4/5), windowHeight/10);
+      audioToggle = createButton('Start Audio');
+      audioToggle.position(windowWidth*(4/5), windowHeight/10);
+      audioOffToggle.hide();
       connectToggle = createButton('Connect to Server');
       beginGameToggle = createButton('Begin Game');
       museToggle = createButton('Connect Muse');
@@ -43,6 +52,20 @@
       //     game.connectBluetoothDevice()
       //     connectToggle.show()
       // });
+
+      //Audio Setup
+      audioToggle.mousePressed(() =>{
+        audioToggle.hide();
+        audioOffToggle.show();
+        snd.startDrone();
+        snd.setVolume(volMain);
+      })    
+
+      audioOffToggle.mousePressed(() =>{
+        audioOffToggle.hide();
+        audioToggle.show();
+        snd.stop(volMain);
+      })    
 
       connectToggle.mousePressed(() => {
         if (input.value() !== ''){
