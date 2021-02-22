@@ -64,8 +64,7 @@
 
       museToggle.mousePressed(async () =>  {
           //Audio
-          // snd.startDrone();
-          // snd.setVolume(volMain);
+          snd.startDrone(volMain);
           // BLE
           await game.bluetooth.devices['muse'].connect()
           game.connectBluetoothDevice()
@@ -205,11 +204,17 @@
         } else if (me.data.health + diff < 0){
           me.data.health = 0;
         } else {
-          me.data.health = 100;
+          me.data.health = 100;  
         }
+
+        //giving an alert sound if health drops at a threshold rate or higher:
+        if(diff < healthDrop){
+          console.log('health dropped')
+          effects.playAlert(nVel);
+        }
+        snd.updateDetune(me.data.health, 100);
       }
     }
-    // console.log(me.data)
     }
   }
   }

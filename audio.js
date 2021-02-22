@@ -3,8 +3,7 @@
 //audio functionality in the Brain Battle game
 class music {
   constructor(root){
-//  getAudioContext.resume();
-    //programming the droneA
+    //programming the drone
     this.root = root;
     this.drone = [new p5.Oscillator('sine'), new p5.Oscillator('sine'), new p5.Oscillator('sine'), new p5.Oscillator('sine')];
   }
@@ -33,8 +32,8 @@ class music {
   
    updateDetune(health, healthInit){
      if (this.health <= this.healthInit) {
-     this.drone[1].freq(2 * this.root + 10 * (1 - exp(-(1 / 50) * (this.healthInit - this.health) / 0.4)) + 0.125);
-     this.drone[2].freq(3*this.root + 4*(1-exp(-(1/50)*(this.healthInit - this.health)/0.4)) - 0.125);
+     this.drone[1].freq(2 * this.root + 10 * (1 - exp(-(1 / 100) * (this.healthInit - this.health) / 0.4)) + 0.125);
+     this.drone[2].freq(3*this.root + 4*(1-exp(-(1/100)*(this.healthInit - this.health)/0.4)) - 0.125);
    }
  }
 }
