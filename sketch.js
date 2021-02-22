@@ -10,6 +10,7 @@
   var bufferArrays;
   var colors;
   let state = 0;
+  let setReady = false;
 
   let margin = 100;
   let hasUserId = false;
@@ -35,7 +36,7 @@
       connectToggle = createButton('Join a Game');
       beginGameToggle = createButton('Begin Game');
       museToggle = createButton('Connect Muse');
-      disconnectToggle = createButton('Disconnect');
+      disconnectToggle = createButton('Leave Game');
       connectToggle.position(windowWidth-25-connectToggle.width, windowHeight-50-connectToggle.height);
       disconnectToggle.position(windowWidth-25-disconnectToggle.width, windowHeight-50-disconnectToggle.height);
       museToggle.position(windowWidth/2-(museToggle.width/2), windowHeight/2-(museToggle.height/2));
@@ -82,31 +83,24 @@
           snd.startDrone(volMain);
       });
 
-      connectToggle.mousePressed(() => {
+      connectToggle.mousePressed(async () => {
+        let dict;
         if (input.value() !== ''){
-          game.connect({'guestaccess': true, 'guestId': input.value()})
+          dict = {'guestaccess': true, 'guestId': input.value()}
           hasUserId = true;
         } else { 
-          game.connect({'guestaccess': true})
-        }
-
+          dict = {'guestaccess': true}
+        }          
+        game.connect(dict).then(res => {
           state = 2
           disconnectToggle.show()
           connectToggle.hide()
           input.hide()
           greeting.hide()
           museToggle.hide()
-          // beginGameToggle.show()
-      // });
-
-      // beginGameToggle.mousePressed(() => {
-        me = game.brains[game.info.access].get(game.me.username)
-        if (me.data.opponent !== undefined){
-          game.brains[game.info.access].get(me.data.opponent).data = {}
-        }
-        me.data = {};
-        me.data.ready = true;
-        beginGameToggle.hide()
+          beginGameToggle.hide()
+          setReady = true;
+      })
       })
 
       disconnectToggle.mousePressed(() => {
@@ -210,7 +204,6 @@
             let data = game.brains[game.info.access].get(username).data
             if (data.opponent === condition && data.ready){
               opp = username
-              console.log('new opponent: ',opp)
               break loop1
             }
         }
@@ -245,6 +238,11 @@
             me = game.brains[game.info.access].get(game.me.username)
 
             if(me !== undefined){
+              if (setReady){
+                me.data = {};
+                me.data.ready = true;
+                setReady = false;
+              }
               opponent = game.brains[game.info.access].get(me.data.opponent)
             }
       
@@ -252,23 +250,18 @@
             if (!toDisconnect && startTime === undefined) {
             if (game.connection.status){
             if (me !== undefined){
-              if (me.data.ready){
-      
+              if (me.data.ready){      
             // Assign Opponent If Ready For One
             if (me.data.opponent === undefined ){
                 let opp = getOpponent(game,me)
                 if (opp !== undefined){
-                  console.log('setting up my health')
                   me.setData({health: 100, opponent: opp})
                 }
             } 
       
             // Reset If Opponent Leaves
-            else {
-              // console.log(me.data)
-      
+            else {      
             if (opponent === undefined){
-              console.log('opponent left server')
               toDisconnect = true;
               message.html(`<div><h3>Opponent Left Server</h1>
             <p>Get back in there!</p></div>`)
@@ -277,7 +270,6 @@
             }  
             // Reset if Opponent Dies
             else if (opponent.data.health === 0){
-              console.log('opponent flatlined')
               toDisconnect = true;
               message.html(`<div><h3>You Won</h1>
             <p>Great job!</p></div>`)
@@ -287,7 +279,6 @@
             } 
             // Reset if You Died
             else if (me.data.health === 0){
-              console.log('you flatlined. resetting...')
               toDisconnect = true;
               message.html(`<div><h3>You Flatlined...</h1>
             <p>Better luck next time!</p></div>`)
@@ -460,15 +451,6 @@
                 centerY - voltageScaling*(buffer[sample+1]-0.5)
                )   
         }
-        
-        // Text Label
-        // noStroke()
-        // textSize(10)
-        // fill('white')
-        // text(contactQuality[channelDict.index].toFixed(1) + ' uV',
-        //   centerX,
-        //   centerY + 40
-        //      )       
            })
          }
     }
