@@ -33,19 +33,12 @@
                description = "<p>Fight to the death with your brains 🤯</p>"
                links = '{}'
     ></info-card>
-    <div id="p5Div" style="
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    background: transparent;
-    "></div>
-
     <script>
       game = new brainsatplay.Game('alphabattle')
       game.simulate(1);
+      let p5Canvas;
+      let uiCanvas;
     </script>
-
 
     <script src="./p5.js"></script>
     <script src="./healthbar.js"></script>
