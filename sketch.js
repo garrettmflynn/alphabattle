@@ -277,6 +277,7 @@
             if (me !== undefined){
               if (me.data.ready){      
             // Assign Opponent If Ready For One
+            console.log(me.data.opponent)
             if (me.data.opponent === undefined ){
                 let opp = getOpponent(game,me)
                 if (opp !== undefined){
@@ -286,18 +287,20 @@
       
             // Reset If Opponent Leaves
             else {      
-            if (opponent === undefined){
+            if (opponent === undefined && lastOppHealth !== 0){
               toDisconnect = true;
               message.html(`<div><h3>Opponent Left Server</h1>
             <p>Get back in there!</p></div>`)
+            lastOppHealth = undefined;
               // me.data = initializeData()
               // beginGameToggle.show()
             }  
             // Reset if Opponent Dies
-            else if (opponent.data.health === 0){
+            else if (lastOppHealth === 0){
               toDisconnect = true;
               message.html(`<div><h3>You Won</h1>
             <p>Great job!</p></div>`)
+            lastOppHealth = undefined;
               // opponent.data = initializeData()
               // me.data = initializeData()
               // beginGameToggle.show()
