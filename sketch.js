@@ -6,6 +6,7 @@
   let greeting;
   let message;
   let title;
+  let state = 0;
 
   let margin = 100;
   let hasUserId = false;
@@ -20,7 +21,7 @@
   let volMain = 0.8;
   let dTime = 20;
   let snd = new music(root, volMain);
-  //let effects = new sfx(root,nVel);
+  let effects = new sfx(root,nVel);
 
   setup = () => {
 
@@ -55,6 +56,7 @@
       message.style('width','100vw')
       message.style('height','100vh')
       message.style('background','black')
+      message.style('z-index','50')
       message.style('opacity','1')
       message.style('transition','0.5s ease-in-out')
       message.style('pointer-events','none')
@@ -63,12 +65,12 @@
       startTime = Date.now() + 1000
 
       museToggle.mousePressed(async () =>  {
-          //Audio
-          snd.startDrone(volMain);
           // BLE
           await game.bluetooth.devices['muse'].connect()
           game.connectBluetoothDevice()
           connectToggle.show()
+          //Audio
+          snd.startDrone(volMain);
       });
 
       connectToggle.mousePressed(() => {
@@ -113,183 +115,15 @@
       // Update Voltage Buffers and Derived Variables
       game.update();
 
-      // Get Opponent (if exists)
-      me = game.brains[game.info.access].get(game.me.username)
+      console.log(state)
 
-      if(me !== undefined){
-        opponent = game.brains[game.info.access].get(me.data.opponent)
-      }
 
-      // Try to Assign Opponents (if connected to server)
-      if (toDisconnect){
-        disconnect()
-        toDisconnect = false;
-        message.center()
-        message.style('opacity','1')
-        startTime = Date.now()
-      } else if (startTime != undefined){
-         if (Date.now() - startTime > displayTime*1000){
-            startTime = undefined;
-            message.style('opacity','0')
-          }
-      } else{
-      if (game.connection.status){
-      if (me !== undefined){
-        if (me.data.ready){
-
-      // Assign Opponent If Ready For One
-      if (me.data.opponent === undefined ){
-          let opp = getOpponent(game,me)
-          if (opp !== undefined){
-            console.log('setting up my health')
-            me.setData({health: 100, opponent: opp})
-          }
-      } 
-
-      // Reset If Opponent Leaves
-      else {
-        // console.log(me.data)
-
-      if (opponent === undefined){
-        console.log('opponent left server')
-        toDisconnect = true;
-        message.html(`<div><h3>Opponent Left Server</h1>
-      <p>Get back in there!</p></div>`)
-        // me.data = initializeData()
-        // beginGameToggle.show()
-      }  
-      // Reset if Opponent Dies
-      else if (opponent.data.health === 0){
-        console.log('opponent flatlined')
-        toDisconnect = true;
-        message.html(`<div><h3>You Won</h1>
-      <p>Great job!</p></div>`)
-        // opponent.data = initializeData()
-        // me.data = initializeData()
-        // beginGameToggle.show()
-      } 
-      // Reset if You Died
-      else if (me.data.health === 0){
-        console.log('you flatlined. resetting...')
-        toDisconnect = true;
-        message.html(`<div><h3>You Flatlined...</h1>
-      <p>Better luck next time!</p></div>`)
-        // opponent.data = initializeData()
-        // me.data = initializeData()
-        // beginGameToggle.show()
-      }
-      // Keep On Battling!
-      else if (me.data.health !== undefined) {
-        let val;
-        let attack;
-        let defense;
-      if (game.bluetooth.status){
-        attack = me.getMetric('beta')
-        defense = me.getMetric('alpha')
-        val = attack.average
+      if (state === 0){
+        playGame()
       } else {
-        attack = noise(Date.now()/1000)*10
-        defense =  noise(Date.now()/1000 + 1000)*10
-        val = attack
-      }
-      me.data.attack = val
-      let diff = defense - opponent.data.attack
-      if (!isNaN(diff)){
-        if (me.data.health + diff >= 0 && me.data.health + diff <= 100){
-          // Only let health go down
-          if (diff < 0){
-            console.log(diff)
-            me.data.health += diff
-          }
-        } else if (me.data.health + diff < 0){
-          me.data.health = 0;
-        } else {
-          me.data.health = 100;  
-        }
-
-        //giving an alert sound if health drops at a threshold rate or higher:
-        if(diff < healthDrop){
-          console.log('health dropped')
-          effects.playAlert(nVel);
-        }
-        snd.updateDetune(me.data.health, 100);
+        voltageInspector()
       }
     }
-    }
-  }
-  }
-}
-      }
-
-    let centerY = windowHeight/2;
-
-    // Create Me and Opponent Markers
-    [me,opponent].forEach( async (user,ind) => {
-      let centerX = (windowWidth/2) + (margin)*((2*ind-1))
-      let barScale = ((windowWidth/2) - 2*margin)/100
-
-      if (user !== undefined){
-
-      // Active Indicator
-      // if (user.data.health === undefined){
-      //   fill(255,50,0)
-      // } else if (user.data.health >= 0 || !user.data.ready){
-      //   fill(0,255,50)
-      // } else {
-      //   fill(255,50,0)
-      //   termFlag = true;
-      // }
-      // User Text
-      fill('white')
-      textSize(15)
-      textAlign(CENTER);
-      let currentColor;
-      let health;
-      if (user.data.health !== undefined){
-        health = user.data.health
-        if (user.easedHealth === undefined){
-          user.easedHealth = health
-        }
-        user.easedHealth += (health - user.easedHealth)*easing
-        let colorScaling = ((100-user.easedHealth)/100)
-        currentColor = color(100 + 155*(colorScaling),100+ 155*(1-colorScaling),100+ 155*(1-colorScaling))
-        currentColor.setAlpha(155)
-        noStroke()
-        fill(currentColor)
-        rect(centerX,centerY - barHeight,(2*ind-1)*user.easedHealth*barScale,barHeight)
-      }
-    }
-    noFill()
-    stroke('white')
-    rect(centerX,centerY - barHeight,(2*ind-1)*100*barScale,barHeight)
-    })
-
-    if (me !== undefined || opponent !== undefined){
-      fill('white')
-      textStyle(NORMAL)
-      textAlign(CENTER,CENTER);
-      textSize(20)
-      text('vs', windowWidth/2, centerY - barHeight/2)
-      if (me !== undefined){
-        textAlign(RIGHT);
-        textSize(15)
-        if (hasUserId){
-          text(me.username, (windowWidth/2) + (margin)*(-1), windowHeight/2  + (margin/4))
-        } else {
-          text('me', (windowWidth/2) + (margin)*(-1), windowHeight/2  + (margin/4))
-        }
-      }
-      if (opponent !== undefined && opponent.data && opponent.data.ready){
-        textAlign(LEFT);
-        textSize(15)
-        if (opponent.username.match(/\w\w\w\w\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w\w\w\w\w\w\w\w\w/)){
-        text('guest', (windowWidth/2) + (margin)*(+1), windowHeight/2  + (margin/4))
-        } else {
-          text(opponent.username, (windowWidth/2) + (margin)*(+1), windowHeight/2  + (margin/4))
-        }
-      }
-    }
-  }
     
   windowResized = () => {
     resizeCanvas(windowWidth,windowHeight)
@@ -306,6 +140,10 @@
     }
 
     keyPressed = () => {
+      let keys = [49,50,51]
+      if (keys.includes(keyCode)){
+        state = keys.indexOf(keyCode)
+      }
     }
 
     function getOpponent(game,me) {
@@ -347,4 +185,244 @@
       // museToggle.show()
       beginGameToggle.hide()
       game.brains[game.info.access].get(game.me.username).data = {};
+    }
+
+    function playGame(){
+            // Get Opponent (if exists)
+            me = game.brains[game.info.access].get(game.me.username)
+
+            if(me !== undefined){
+              opponent = game.brains[game.info.access].get(me.data.opponent)
+            }
+      
+            // Try to Assign Opponents (if connected to server)
+            if (toDisconnect){
+              disconnect()
+              toDisconnect = false;
+              message.center()
+              message.style('opacity','1')
+              startTime = Date.now()
+            } else if (startTime != undefined){
+               if (Date.now() - startTime > displayTime*1000){
+                  startTime = undefined;
+                  message.style('opacity','0')
+                }
+            } else{
+            if (game.connection.status){
+            if (me !== undefined){
+              if (me.data.ready){
+      
+            // Assign Opponent If Ready For One
+            if (me.data.opponent === undefined ){
+                let opp = getOpponent(game,me)
+                if (opp !== undefined){
+                  console.log('setting up my health')
+                  me.setData({health: 100, opponent: opp})
+                }
+            } 
+      
+            // Reset If Opponent Leaves
+            else {
+              // console.log(me.data)
+      
+            if (opponent === undefined){
+              console.log('opponent left server')
+              toDisconnect = true;
+              message.html(`<div><h3>Opponent Left Server</h1>
+            <p>Get back in there!</p></div>`)
+              // me.data = initializeData()
+              // beginGameToggle.show()
+            }  
+            // Reset if Opponent Dies
+            else if (opponent.data.health === 0){
+              console.log('opponent flatlined')
+              toDisconnect = true;
+              message.html(`<div><h3>You Won</h1>
+            <p>Great job!</p></div>`)
+              // opponent.data = initializeData()
+              // me.data = initializeData()
+              // beginGameToggle.show()
+            } 
+            // Reset if You Died
+            else if (me.data.health === 0){
+              console.log('you flatlined. resetting...')
+              toDisconnect = true;
+              message.html(`<div><h3>You Flatlined...</h1>
+            <p>Better luck next time!</p></div>`)
+              // opponent.data = initializeData()
+              // me.data = initializeData()
+              // beginGameToggle.show()
+            }
+            // Keep On Battling!
+            else if (me.data.health !== undefined) {
+              let val;
+              let attack;
+              let defense;
+            if (game.bluetooth.status){
+              attack = me.getMetric('beta')
+              defense = me.getMetric('alpha')
+              val = attack.average
+            } else {
+              attack = noise(Date.now()/1000)*10
+              defense =  noise(Date.now()/1000 + 1000)*10
+              val = attack
+            }
+            me.data.attack = val
+            let diff = defense - opponent.data.attack
+            if (!isNaN(diff)){
+              if (me.data.health + diff >= 0 && me.data.health + diff <= 100){
+                // Only let health go down
+                if (diff < 0){
+                  me.data.health += diff
+                }
+              } else if (me.data.health + diff < 0){
+                me.data.health = 0;
+              } else {
+                me.data.health = 100;  
+              }
+      
+              //giving an alert sound if health drops at a threshold rate or higher:
+              if(diff < -5){
+                console.log('health dropped')
+                effects.playAlert(nVel);
+              }
+              snd.updateDetune(me.data.health, 100);
+            }
+          }
+          }        
+        }
+        }
+      }
+            }
+            
+      
+          let centerY = windowHeight/2;
+      
+          // Create Me and Opponent Markers
+          [me,opponent].forEach( async (user,ind) => {
+            let centerX = (windowWidth/2) + (margin)*((2*ind-1))
+            let barScale = ((windowWidth/2) - 2*margin)/100
+      
+            if (user !== undefined){
+      
+            // Active Indicator
+            // if (user.data.health === undefined){
+            //   fill(255,50,0)
+            // } else if (user.data.health >= 0 || !user.data.ready){
+            //   fill(0,255,50)
+            // } else {
+            //   fill(255,50,0)
+            //   termFlag = true;
+            // }
+            // User Text
+            fill('white')
+            textSize(15)
+            textAlign(CENTER);
+            let currentColor;
+            let health;
+            if (user.data.health !== undefined){
+              health = user.data.health
+              if (user.easedHealth === undefined){
+                user.easedHealth = health
+              }
+              user.easedHealth += (health - user.easedHealth)*easing
+              let colorScaling = ((100-user.easedHealth)/100)
+              currentColor = color(100 + 155*(colorScaling),100+ 155*(1-colorScaling),100+ 155*(1-colorScaling))
+              currentColor.setAlpha(155)
+              noStroke()
+              fill(currentColor)
+              rect(centerX,centerY - barHeight,(2*ind-1)*user.easedHealth*barScale,barHeight)
+            }
+          }
+          noFill()
+          stroke('white')
+          rect(centerX,centerY - barHeight,(2*ind-1)*100*barScale,barHeight)
+          })
+      
+          if (me !== undefined || opponent !== undefined){
+            fill('white')
+            textStyle(NORMAL)
+            textAlign(CENTER,CENTER);
+            textSize(20)
+            text('vs', windowWidth/2, centerY - barHeight/2)
+            if (me !== undefined){
+              textAlign(RIGHT);
+              textSize(15)
+              if (hasUserId){
+                text(me.username, (windowWidth/2) + (margin)*(-1), windowHeight/2  + (margin/4))
+              } else {
+                text('me', (windowWidth/2) + (margin)*(-1), windowHeight/2  + (margin/4))
+              }
+            }
+            if (opponent !== undefined && opponent.data && opponent.data.ready){
+              textAlign(LEFT);
+              textSize(15)
+              if (opponent.username.match(/\w\w\w\w\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w\w\w\w\w\w\w\w\w/)){
+              text('guest', (windowWidth/2) + (margin)*(+1), windowHeight/2  + (margin/4))
+              } else {
+                text(opponent.username, (windowWidth/2) + (margin)*(+1), windowHeight/2  + (margin/4))
+              }
+            }
+          }
+    }
+
+
+    function voltageInspector() {
+      noStroke()
+      fill(50,50,50)
+      let headWidth = Math.min(windowHeight/2, windowWidth/2)
+      ellipse(windowWidth / 2, windowHeight / 2 + 20, headWidth,headWidth+headWidth*(1/6)) // Head
+      ellipse(windowWidth / 2, windowHeight / 2 - (headWidth+headWidth*(1/6) - 50)/2, headWidth/10) // Nose
+      ellipse(windowWidth / 2 + 75, windowHeight / 2 + 20, headWidth/10,headWidth/5) // Left Ear
+      ellipse(windowWidth / 2 - 75, windowHeight / 2 + 20, headWidth/10,headWidth/5) // Right Ear
+    
+        // Get Voltage Amplitude
+        let brain = game.brains[game.info.access].get(game.me.username)
+         if (brain !== undefined){
+        let voltage = brain.getVoltage();
+        brain.usedChannels.forEach((channelDict,ind) => {
+            let [x, y, z] = brain.eegCoordinates[channelDict.name]
+            
+            let centerX = x*(headWidth/150) + (windowWidth / 2)
+            let centerY = -y*(headWidth/150) + windowHeight / 2
+                   
+            let buffer = voltage[channelDict.index]
+            let aveAmp = buffer.reduce((a, b) => a + Math.abs(b), 0) / buffer.length;
+            let voltageScaling = (headWidth/150)/10
+            let signalWidth = 50*(1+voltageScaling)
+    
+    // Zero Line
+    stroke(255,255,255)
+    line(centerX - (signalWidth+10)/2, 
+      centerY,
+      centerX + (signalWidth+10) - (signalWidth+10)/2, 
+      centerY
+      )   
+      
+    
+      // Colored Line
+    stroke(
+      255*(aveAmp/100), // Red
+      255*(1-aveAmp/100), // Green
+        0
+      )
+    
+        for (let sample = 0; sample < buffer.length; sample++){
+           line(centerX + (signalWidth*(sample/buffer.length) - signalWidth/2), 
+                centerY - voltageScaling*buffer[sample],
+                centerX + (signalWidth*((sample+1)/buffer.length) - signalWidth/2), 
+                centerY - voltageScaling*buffer[sample+1]
+               )   
+        }
+        
+        // Text Label
+        noStroke()
+        textSize(10)
+        fill('white')
+        text(aveAmp.toFixed(1) + ' uV',
+          centerX,
+          centerY + (40*(1+voltageScaling))
+             )       
+           })
+         }
     }
